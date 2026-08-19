@@ -1,0 +1,2782 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Vendor Management</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;}
+
+.header{background:linear-gradient(135deg,#1e3a5f 0%,#0f172a 100%);border-bottom:1px solid #1e40af;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;}
+.header-left{display:flex;align-items:center;gap:12px;}
+.header-icon{width:42px;height:42px;background:#2563eb;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.header h1{font-size:1.2rem;font-weight:700;color:#fff;}
+.header h1 span{color:#60a5fa;}
+.header-sub{font-size:.72rem;color:#94a3b8;margin-top:2px;}
+.header-right{display:flex;align-items:center;gap:10px;}
+.total-trips{background:#1e293b;border:1px solid #334155;padding:5px 12px;border-radius:8px;font-size:.73rem;color:#94a3b8;}
+.total-trips span{color:#60a5fa;font-weight:700;}
+.header-badge{background:#1e40af;color:#93c5fd;padding:5px 12px;border-radius:16px;font-size:.7rem;font-weight:600;letter-spacing:.5px;}
+
+.filters{background:#1e293b;border-bottom:1px solid #334155;padding:10px 24px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.filter-group{display:flex;align-items:center;gap:6px;}
+.filter-group label{font-size:.68rem;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+.filter-group select{background:#0f172a;border:1px solid #334155;color:#e2e8f0;padding:5px 9px;border-radius:7px;font-size:.76rem;cursor:pointer;outline:none;}
+.filter-group select:focus{border-color:#3b82f6;}
+.filter-divider{width:1px;height:20px;background:#334155;flex-shrink:0;}
+.filter-count{margin-left:auto;font-size:.7rem;color:#64748b;white-space:nowrap;}
+.filter-count span{color:#60a5fa;font-weight:700;}
+.reset-btn{background:#1e293b;border:1px solid #334155;color:#94a3b8;padding:5px 10px;border-radius:7px;font-size:.7rem;cursor:pointer;}
+.reset-btn:hover{border-color:#3b82f6;color:#60a5fa;}
+
+.kpi-section{padding:16px 24px 8px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.kpi-card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.kpi-card.blue::before{background:#3b82f6;}.kpi-card.green::before{background:#22c55e;}
+.kpi-card.red::before{background:#ef4444;}.kpi-card.purple::before{background:#a855f7;}
+.kpi-icon{font-size:1.2rem;margin-bottom:6px;}
+.kpi-label{font-size:.66rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.7px;}
+.kpi-value{font-size:1.8rem;font-weight:800;color:#f1f5f9;line-height:1.2;margin:3px 0;}
+.kpi-card.green .kpi-value{color:#4ade80;}.kpi-card.red .kpi-value{color:#f87171;}.kpi-card.purple .kpi-value{color:#c084fc;}
+.kpi-sub{font-size:.66rem;color:#64748b;}
+
+.charts-section{padding:12px 24px;}
+.chart-card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px;}
+.chart-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
+.chart-title{font-size:.82rem;font-weight:700;color:#e2e8f0;}
+.chart-subtitle{font-size:.66rem;color:#64748b;margin-top:2px;}
+.chart-tag{background:#0f172a;border:1px solid #334155;padding:3px 8px;border-radius:5px;font-size:.64rem;color:#94a3b8;white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis;}
+.chart-wrap{position:relative;height:200px;}
+
+.bottom-section{padding:0 24px 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+table{width:100%;border-collapse:collapse;font-size:.73rem;}
+thead th{background:#0f172a;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.4px;padding:7px 9px;text-align:left;font-size:.63rem;border-bottom:1px solid #334155;}
+tbody tr{border-bottom:1px solid #1e293b99;}
+tbody tr:hover{background:#1e3a5f22;}
+tbody td{padding:6px 9px;color:#cbd5e1;}
+.table-scroll{overflow-y:auto;max-height:250px;}
+.table-scroll::-webkit-scrollbar{width:3px;}
+.table-scroll::-webkit-scrollbar-track{background:#0f172a;}
+.table-scroll::-webkit-scrollbar-thumb{background:#334155;border-radius:3px;}
+
+.ota-bar-wrap{display:flex;align-items:center;gap:5px;}
+.ota-bar-bg{flex:1;background:#0f172a;border-radius:4px;height:6px;}
+.ota-bar-fill{height:6px;border-radius:4px;}
+.ota-pct{font-weight:700;font-size:.73rem;min-width:32px;}
+.good{color:#4ade80;}.bad{color:#f87171;}.mid{color:#fbbf24;}
+
+.status-badge{display:inline-block;padding:2px 6px;border-radius:10px;font-size:.62rem;font-weight:700;}
+.status-badge.ot{background:#14532d;color:#4ade80;}.status-badge.late{background:#450a0a;color:#f87171;}
+
+.site-summary-section{padding:0 24px 12px;}
+.site-summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px;}
+.site-card{background:#1e293b;border:1px solid #334155;border-radius:10px;padding:12px 14px;}
+.site-card-name{font-size:.75rem;font-weight:700;color:#e2e8f0;margin-bottom:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.site-ota-pct{font-size:1.1rem;font-weight:800;}
+
+.footer{padding:9px 24px;border-top:1px solid #1e293b;display:flex;justify-content:space-between;align-items:center;}
+.footer-note{font-size:.63rem;color:#475569;}
+.footer-note span{color:#3b82f6;}
+
+/* Active filter chips */
+.active-filters{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.filter-chip{background:#1e3a5f;border:1px solid #2563eb;color:#93c5fd;padding:2px 8px;border-radius:12px;font-size:.64rem;}
+
+/* Loading overlay */
+.loading-overlay{position:fixed;inset:0;background:#0f172a;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .3s;}
+.loading-overlay.hidden{opacity:0;pointer-events:none;}
+.loading-spinner{width:48px;height:48px;border:4px solid #1e293b;border-top-color:#3b82f6;border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-text{color:#e2e8f0;font-size:.95rem;font-weight:600;}
+.loading-sub{color:#64748b;font-size:.75rem;}
+.error-box{background:#1e293b;border:1px solid #ef4444;color:#f87171;padding:20px 28px;border-radius:12px;text-align:center;max-width:400px;}
+
+.refresh-btn{background:#1e293b;border:1px solid #334155;color:#94a3b8;padding:4px 10px;border-radius:7px;font-size:.68rem;cursor:pointer;display:flex;align-items:center;gap:4px;}
+.refresh-btn:hover{border-color:#3b82f6;color:#60a5fa;}
+
+@media(max-width:900px){
+  .kpi-section{grid-template-columns:repeat(2,1fr);}
+  .charts-section,.bottom-section,.site-summary-grid{grid-template-columns:1fr;}
+}
+
+/* Multi-select dropdown */
+.ms-wrap{position:relative;}
+.ms-trigger{background:#0f172a;border:1px solid #334155;color:#e2e8f0;padding:5px 10px;border-radius:7px;font-size:.76rem;cursor:pointer;display:flex;align-items:center;gap:6px;min-width:110px;text-align:left;transition:border-color .15s;}
+.ms-trigger:hover,.ms-trigger.open{border-color:#3b82f6;}
+.ms-label{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;}
+.ms-caret{font-size:.55rem;color:#64748b;transition:transform .2s;flex-shrink:0;}
+.ms-trigger.open .ms-caret{transform:rotate(180deg);}
+.ms-body{display:none;position:absolute;top:calc(100% + 4px);left:0;background:#1e293b;border:1px solid #334155;border-radius:8px;z-index:300;min-width:160px;max-height:220px;overflow-y:auto;box-shadow:0 8px 24px #0008;padding:4px 0;}
+.ms-body.open{display:block;}
+.ms-opt{display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;font-size:.73rem;color:#cbd5e1;user-select:none;}
+.ms-opt:hover{background:#1e3a5f;}
+.ms-opt input[type=checkbox]{accent-color:#3b82f6;width:13px;height:13px;cursor:pointer;flex-shrink:0;}
+.ms-divider{height:1px;background:#334155;margin:3px 0;}
+.ms-wrap.ms-active .ms-trigger{border-color:#3b82f6;background:#172554;}
+.ms-wrap.ms-active .ms-label{color:#93c5fd;}
+.ms-body::-webkit-scrollbar{width:3px;}
+.ms-body::-webkit-scrollbar-thumb{background:#334155;border-radius:3px;}
+
+/* Batch KPI cards */
+.batch-kpi-section{padding:0 24px 12px;}
+.batch-kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:8px;}
+.batch-kpi-card{background:#1e293b;border:1px solid #334155;border-radius:10px;padding:12px 14px;position:relative;overflow:hidden;}
+.batch-kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:10px 10px 0 0;}
+.batch-kpi-name{font-size:.66rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;}
+.batch-kpi-rate{font-size:1.6rem;font-weight:900;line-height:1.1;margin-bottom:1px;}
+.batch-kpi-grade{font-size:.68rem;font-weight:700;margin-bottom:6px;}
+.batch-kpi-bar{height:4px;border-radius:2px;margin-bottom:6px;background:#0f172a;}
+.batch-kpi-bar-fill{height:4px;border-radius:2px;}
+.batch-kpi-counts{display:flex;gap:6px;font-size:.6rem;color:#64748b;}
+.grade-A{color:#4ade80;}.grade-B{color:#fbbf24;}.grade-C{color:#fb923c;}.grade-D{color:#f87171;}
+
+/* Tab Navigation */
+.tab-nav{background:#1e293b;border-bottom:1px solid #334155;padding:0 24px;display:flex;gap:0;align-items:flex-end;}
+.tab-btn{padding:10px 20px;font-size:.78rem;font-weight:600;color:#64748b;background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;letter-spacing:.3px;transition:all .2s;display:flex;align-items:center;gap:7px;white-space:nowrap;}
+.tab-btn:hover{color:#94a3b8;background:#ffffff08;}
+.tab-btn.active{color:#60a5fa;border-bottom:2px solid #3b82f6;background:transparent;}
+.tab-btn .tab-icon{font-size:.95rem;}
+.tab-btn .tab-badge{background:#1e3a5f;color:#93c5fd;padding:1px 6px;border-radius:8px;font-size:.6rem;font-weight:700;}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+
+/* Coming Soon placeholder */
+.coming-soon{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;color:#475569;}
+.coming-soon-icon{font-size:3rem;opacity:.5;}
+.coming-soon-title{font-size:1.1rem;font-weight:700;color:#64748b;}
+.coming-soon-sub{font-size:.78rem;color:#475569;text-align:center;max-width:320px;line-height:1.6;}
+.coming-soon-tag{background:#1e293b;border:1px solid #334155;color:#475569;padding:5px 14px;border-radius:20px;font-size:.68rem;font-weight:600;margin-top:4px;}
+
+/* Delay KPI cards */
+.delay-kpi-section{padding:0 24px 12px;}
+.delay-kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:8px;}
+.delay-kpi-card{background:#1e293b;border:1px solid #334155;border-radius:8px;padding:10px 6px;text-align:center;position:relative;overflow:hidden;}
+.delay-kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.delay-kpi-lbl{font-size:.58rem;color:#94a3b8;font-weight:600;margin-bottom:4px;white-space:nowrap;}
+.delay-kpi-num{font-size:1.3rem;font-weight:800;line-height:1;}
+.delay-kpi-pct{font-size:.58rem;color:#64748b;margin-top:2px;}
+@media(max-width:900px){.delay-kpi-grid{grid-template-columns:repeat(3,1fr);}}
+
+/* ── Loading Performance ── */
+.lp-3metric-section{padding:0 24px 12px;}
+.lp-3metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:10px;}
+.lp-metric-card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px;position:relative;overflow:hidden;}
+.lp-metric-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.lp-metric-card.tunggu::before{background:#a855f7;}
+.lp-metric-card.loading::before{background:#f59e0b;}
+.lp-metric-card.aging::before{background:#06b6d4;}
+.lp-metric-icon{font-size:1.2rem;margin-bottom:5px;}
+.lp-metric-label{font-size:.66rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px;}
+.lp-metric-value{font-size:1.9rem;font-weight:800;line-height:1.1;margin-bottom:2px;}
+.lp-metric-card.tunggu .lp-metric-value{color:#c084fc;}
+.lp-metric-card.loading .lp-metric-value{color:#fbbf24;}
+.lp-metric-card.aging .lp-metric-value{color:#22d3ee;}
+.lp-metric-sub{font-size:.62rem;color:#475569;margin-top:2px;}
+.lp-metric-rate{margin-top:8px;padding-top:7px;border-top:1px solid #334155;font-size:.7rem;font-weight:700;}
+.lp-armada-section{padding:0 24px 12px;}
+.lp-armada-grid{display:flex;flex-direction:column;gap:16px;margin-top:8px;}
+.lp-site-row{display:flex;flex-direction:column;gap:8px;}
+.lp-site-row-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding-left:9px;}
+.lp-armada-row-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;}
+.lp-armada-card{background:#1e293b;border:1px solid #334155;border-radius:10px;padding:11px 13px;position:relative;overflow:hidden;}
+.lp-armada-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:10px 10px 0 0;}
+.lp-arm-name{font-size:.62rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;}
+.lp-arm-time{font-size:1.35rem;font-weight:900;line-height:1.1;margin-bottom:1px;}
+.lp-arm-target{font-size:.6rem;color:#64748b;margin-bottom:5px;}
+.lp-arm-bar{height:4px;border-radius:2px;margin-bottom:6px;background:#0f172a;}
+.lp-arm-bar-fill{height:4px;border-radius:2px;}
+.lp-arm-counts{display:flex;gap:8px;font-size:.6rem;color:#64748b;}
+@media(max-width:900px){.lp-3metric-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Memuat Data OTA…</div>
+  <div class="loading-sub" id="loadingStatus">Menghubungkan ke Google Sheets</div>
+</div>
+
+<div class="header">
+  <div class="header-left">
+    <div class="header-icon">🏭</div>
+    <div>
+      <h1>Dashboard <span>Vendor Management</span></h1>
+      <div class="header-sub" id="headerSub">Monitoring performa vendor armada & pengiriman</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="total-trips" id="headerTripCount">Filtered: <span id="grandTotal">0</span> trips</div>
+    <button class="refresh-btn" id="headerRefreshBtn" onclick="reloadData()" title="Refresh data">↺ Refresh</button>
+    <div class="header-badge">VENDOR MGMT v1.0</div>
+  </div>
+</div>
+
+<!-- Tab Navigation -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('ota', this)">
+    <span class="tab-icon">🚛</span> On Time Arrive
+  </button>
+  <button class="tab-btn" onclick="switchTab('loading', this)">
+    <span class="tab-icon">⏱️</span> Loading Performance
+  </button>
+  <button class="tab-btn" onclick="switchTab('fulfillment', this)">
+    <span class="tab-icon">🎯</span> Fulfillment Rate
+  </button>
+  <button class="tab-btn" onclick="switchTab('analytics', this)">
+    <span class="tab-icon">📊</span> Analytics
+  </button>
+</div>
+
+<!-- TAB: On Time Arrive -->
+<div class="tab-content active" id="tab-ota">
+
+<div class="filters">
+  <div class="filter-group">
+    <label>Supply Site</label>
+    <div class="ms-wrap" id="msSite">
+      <button class="ms-trigger" onclick="toggleMS('msSite')" type="button"><span class="ms-label">Semua Site</span><span class="ms-caret">▾</span></button>
+      <div class="ms-body"></div>
+    </div>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <label>Bulan</label>
+    <div class="ms-wrap" id="msMonth">
+      <button class="ms-trigger" onclick="toggleMS('msMonth')" type="button"><span class="ms-label">Semua Bulan</span><span class="ms-caret">▾</span></button>
+      <div class="ms-body"></div>
+    </div>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <label>Moda</label>
+    <div class="ms-wrap" id="msModa">
+      <button class="ms-trigger" onclick="toggleMS('msModa')" type="button"><span class="ms-label">Semua Moda</span><span class="ms-caret">▾</span></button>
+      <div class="ms-body"></div>
+    </div>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <label>Batch</label>
+    <div class="ms-wrap" id="msBatch">
+      <button class="ms-trigger" onclick="toggleMS('msBatch')" type="button"><span class="ms-label">Semua Batch</span><span class="ms-caret">▾</span></button>
+      <div class="ms-body"></div>
+    </div>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <label>BU</label>
+    <div class="ms-wrap" id="msBU">
+      <button class="ms-trigger" onclick="toggleMS('msBU')" type="button"><span class="ms-label">Semua BU</span><span class="ms-caret">▾</span></button>
+      <div class="ms-body"></div>
+    </div>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <label>Vendor</label>
+    <div class="ms-wrap" id="msVendor">
+      <button class="ms-trigger" onclick="toggleMS('msVendor')" type="button"><span class="ms-label">Semua Vendor</span><span class="ms-caret">▾</span></button>
+      <div class="ms-body"></div>
+    </div>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <label>Tanggal</label>
+    <div class="ms-wrap" id="msDate">
+      <button class="ms-trigger" onclick="toggleMS('msDate')" type="button"><span class="ms-label">Semua Tgl</span><span class="ms-caret">▾</span></button>
+      <div class="ms-body"></div>
+    </div>
+  </div>
+  <button class="reset-btn" onclick="resetFilters()">↺ Reset</button>
+  <div class="filter-count">Menampilkan: <span id="filterCount">0</span> trips</div>
+</div>
+
+<div class="kpi-section" id="kpiSection">
+  <div class="kpi-card blue"><div class="kpi-icon">📦</div><div class="kpi-label">Total Trip</div><div class="kpi-value" id="kpiTotal">0</div><div class="kpi-sub">Hasil filter aktif</div></div>
+  <div class="kpi-card green"><div class="kpi-icon">✅</div><div class="kpi-label">On Time</div><div class="kpi-value" id="kpiOT">0</div><div class="kpi-sub">Checkout ≤ Req Stuffing</div></div>
+  <div class="kpi-card red"><div class="kpi-icon">⚠️</div><div class="kpi-label">Late</div><div class="kpi-value" id="kpiLate">0</div><div class="kpi-sub">Checkout > Req Stuffing</div></div>
+  <div class="kpi-card purple"><div class="kpi-icon">📊</div><div class="kpi-label">OTA Rate</div><div class="kpi-value" id="kpiRate">0%</div><div class="kpi-sub" id="kpiRateSub">—</div></div>
+</div>
+
+<div class="charts-section" id="chartsSection">
+  <div class="chart-card">
+    <div class="chart-header">
+      <div><div class="chart-title">OTA Rate per Hari</div><div class="chart-subtitle">Ketepatan waktu berdasarkan tanggal Req Stuffing</div></div>
+      <div class="chart-tag" id="chartTag">All</div>
+    </div>
+    <div class="chart-wrap"><canvas id="chartDaily"></canvas></div>
+  </div>
+</div>
+
+<!-- Batch KPI -->
+<div class="batch-kpi-section">
+  <div class="chart-title" style="font-size:.82rem;">Performa per Batch</div>
+  <div class="chart-subtitle" style="font-size:.66rem;color:#64748b;margin-top:2px;">Grade A ≥80% · B ≥60% · C ≥40% · D &lt;40% · Sesuai filter aktif</div>
+  <div class="batch-kpi-grid" id="batchKpiGrid"></div>
+</div>
+
+<div class="site-summary-section" id="siteSummarySection">
+  <div class="chart-title" style="font-size:.82rem;">Ringkasan per Supply Site</div>
+  <div class="chart-subtitle" style="font-size:.66rem;color:#64748b;margin-top:2px;">OTA rate keseluruhan per site sesuai filter aktif</div>
+  <div class="site-summary-grid" id="siteSummaryGrid"></div>
+</div>
+
+<!-- Delay OTA KPI -->
+<div class="delay-kpi-section">
+  <div class="chart-title" style="font-size:.82rem;">Distribusi Delay OTA</div>
+  <div class="chart-subtitle" style="font-size:.66rem;color:#64748b;margin-top:2px;">Klasifikasi keterlambatan trip Late · sesuai filter aktif</div>
+  <div class="delay-kpi-grid" id="delayKpiGrid"></div>
+</div>
+
+<div class="bottom-section" id="bottomSection">
+  <div class="chart-card">
+    <div class="chart-header">
+      <div><div class="chart-title">Performa per Vendor</div><div class="chart-subtitle">OTA rate dan volume trip per vendor</div></div>
+      <select id="vendorSort" onchange="applyFilters()" style="background:#0f172a;border:1px solid #334155;color:#e2e8f0;padding:4px 8px;border-radius:7px;font-size:.7rem;cursor:pointer;outline:none;">
+        <option value="total_desc">Total ↓</option>
+        <option value="ota_desc">OTA Rate ↓ Tertinggi</option>
+        <option value="ota_asc">OTA Rate ↑ Terendah</option>
+        <option value="name_asc">Nama A–Z</option>
+      </select>
+    </div>
+    <div class="table-scroll">
+      <table><thead><tr><th>Vendor</th><th>Total</th><th>OT</th><th>Late</th><th>OTA Rate</th></tr></thead>
+      <tbody id="vendorTableBody"></tbody></table>
+    </div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Detail Performa Vendor</div>
+        <div class="chart-subtitle" id="vendorDetailSubtitle">Klik vendor untuk melihat detail rute &amp; armada</div>
+      </div>
+      <select id="vendorDetailSort" onchange="renderVendorDetail()" style="background:#0f172a;border:1px solid #334155;color:#e2e8f0;padding:4px 8px;border-radius:7px;font-size:.7rem;cursor:pointer;outline:none;">
+        <option value="total_desc">Total Trip ↓</option>
+        <option value="ota_desc">OTA % ↓ Terbesar</option>
+        <option value="ota_asc">OTA % ↑ Terkecil</option>
+      </select>
+    </div>
+    <div id="vendorDetailEmpty" style="padding:32px 16px;text-align:center;color:#475569;font-size:.76rem;line-height:1.8;">
+      <div style="font-size:1.6rem;margin-bottom:4px;">👈</div>
+      Pilih salah satu vendor di tabel sebelah kiri
+    </div>
+    <div class="table-scroll" id="vendorDetailTableWrap" style="display:none;">
+      <table><thead><tr><th>Rute / Type Armada</th><th>Total</th><th>OT</th><th>Late</th><th>OTA %</th></tr></thead>
+      <tbody id="detailTableBody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- Route OTA per Tujuan -->
+<div class="site-summary-section" id="routeTujuanSection">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+    <div>
+      <div class="chart-title" style="font-size:.82rem;">% OTA per Rute (Tujuan)</div>
+      <div class="chart-subtitle" style="font-size:.66rem;color:#64748b;margin-top:2px;">Hit rate ketepatan waktu per kota tujuan · sesuai filter aktif</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <input type="text" id="routeSearch" placeholder="🔍 Cari tujuan…" oninput="applyFilters()"
+        style="background:#0f172a;border:1px solid #334155;color:#e2e8f0;padding:5px 11px;border-radius:7px;font-size:.73rem;outline:none;width:148px;transition:border-color .15s;"
+        onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#334155'">
+      <select id="routeSort" onchange="applyFilters()"
+        style="background:#0f172a;border:1px solid #334155;color:#e2e8f0;padding:5px 9px;border-radius:7px;font-size:.73rem;cursor:pointer;outline:none;">
+        <option value="total_desc">Total Trip ↓</option>
+        <option value="rate_desc">OTA Rate ↓ Tertinggi</option>
+        <option value="rate_asc">OTA Rate ↑ Terendah</option>
+        <option value="name_asc">Nama A–Z</option>
+      </select>
+    </div>
+  </div>
+  <div class="chart-card" style="margin-top:10px;padding:0;">
+    <div class="table-scroll" style="max-height:300px;">
+      <table>
+        <thead><tr><th>#</th><th>Tujuan</th><th>Area</th><th>Total</th><th>OT</th><th>Late</th><th>OTA Rate</th></tr></thead>
+        <tbody id="routeTujuanTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div id="routeSearchEmpty" style="display:none;color:#64748b;font-size:.75rem;padding:10px 0;text-align:center;">Tidak ada tujuan yang cocok dengan pencarian.</div>
+</div>
+
+<div class="footer">
+  <div class="footer-note">Source: <span>GSheet – Data Dashboard OTA</span> &nbsp;|&nbsp; OTA = Checkout ≤ Req Stuffing &nbsp;|&nbsp; Total <span id="footerTotal">—</span> trips</div>
+  <div class="footer-note">Diperbarui: <span id="lastUpdated">—</span></div>
+</div>
+
+</div><!-- end tab-ota -->
+
+<!-- TAB: Loading Performance -->
+<div class="tab-content" id="tab-loading">
+
+<!-- LP Filters -->
+<div class="filters" id="lpFiltersBar">
+  <div class="filter-group">
+    <label>DC / Site</label>
+    <div class="ms-wrap" id="lpMsSite">
+      <button class="ms-trigger" onclick="toggleMS('lpMsSite')" type="button"><span class="ms-label">Semua Site</span><span class="ms-caret">▾</span></button>
+      <div class="ms-body"></div>
+    </div>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <label>Bulan</label>
+    <div class="ms-wrap" id="lpMsMonth">
+      <button class="ms-trigger" onclick="toggleMS('lpMsMonth')" type="button"><span class="ms-label">Semua Bulan</span><span class="ms-caret">▾</span></button>
+      <div class="ms-body"></div>
+    </div>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <label>Type Armada</label>
+    <div class="ms-wrap" id="lpMsArmada">
+      <button class="ms-trigger" onclick="toggleMS('lpMsArmada')" type="button"><span class="ms-label">Semua Armada</span><span class="ms-caret">▾</span></button>
+      <div class="ms-body"></div>
+    </div>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <label>BU</label>
+    <div class="ms-wrap" id="lpMsBU">
+      <button class="ms-trigger" onclick="toggleMS('lpMsBU')" type="button"><span class="ms-label">Semua BU</span><span class="ms-caret">▾</span></button>
+      <div class="ms-body"></div>
+    </div>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <label>Vendor</label>
+    <div class="ms-wrap" id="lpMsVendor">
+      <button class="ms-trigger" onclick="toggleMS('lpMsVendor')" type="button"><span class="ms-label">Semua Vendor</span><span class="ms-caret">▾</span></button>
+      <div class="ms-body"></div>
+    </div>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <label>Tanggal</label>
+    <div class="ms-wrap" id="lpMsDate">
+      <button class="ms-trigger" onclick="toggleMS('lpMsDate')" type="button"><span class="ms-label">Semua Tgl</span><span class="ms-caret">▾</span></button>
+      <div class="ms-body"></div>
+    </div>
+  </div>
+  <button class="reset-btn" onclick="resetLPFilters()">↺ Reset</button>
+  <div class="filter-count">Menampilkan: <span id="lpFilterCount">0</span> trips</div>
+</div>
+
+<!-- KPI Summary -->
+<div class="kpi-section">
+  <div class="kpi-card blue"><div class="kpi-icon">📦</div><div class="kpi-label">Total Trip</div><div class="kpi-value" id="lpKpiTotal">0</div><div class="kpi-sub">Hasil filter aktif</div></div>
+  <div class="kpi-card green"><div class="kpi-icon">✅</div><div class="kpi-label">On Time Loading</div><div class="kpi-value" id="lpKpiOT">0%</div><div class="kpi-sub" id="lpKpiOTSub">Loading Time ≤ Target</div></div>
+  <div class="kpi-card purple"><div class="kpi-icon">⏳</div><div class="kpi-label">Avg Tunggu Muat</div><div class="kpi-value" id="lpKpiTunggu" style="color:#c084fc">—</div><div class="kpi-sub">Menunggu sebelum loading</div></div>
+  <div class="kpi-card red"><div class="kpi-icon">⏱️</div><div class="kpi-label">Avg Loading Time</div><div class="kpi-value" id="lpKpiLoading" style="color:#fbbf24">—</div><div class="kpi-sub">Durasi Open → Close</div></div>
+</div>
+
+<!-- 3 Metric Cards -->
+<div class="lp-3metric-section">
+  <div class="chart-title" style="font-size:.82rem;">Ringkasan 3 Metrik Loading</div>
+  <div class="chart-subtitle" style="font-size:.66rem;color:#64748b;margin-top:2px;">Tunggu Muat · Loading Time · Aging DC — sesuai filter aktif</div>
+  <div class="lp-3metric-grid" id="lp3MetricGrid"></div>
+</div>
+
+<!-- Armada Performance -->
+<div class="lp-armada-section">
+  <div class="chart-title" style="font-size:.82rem;">Performa per Type Armada</div>
+  <div class="chart-subtitle" style="font-size:.66rem;color:#64748b;margin-top:2px;">Avg loading time vs standart · On Time rate per armada</div>
+  <div class="lp-armada-grid" id="lpArmadaGrid"></div>
+</div>
+
+<!-- Daily Chart -->
+<div class="charts-section">
+  <div class="chart-card">
+    <div class="chart-header">
+      <div><div class="chart-title">On Time Loading per Hari</div><div class="chart-subtitle">% trip loading tepat waktu (Loading Time ≤ target site)</div></div>
+      <div class="chart-tag" id="lpChartTag">All</div>
+    </div>
+    <div class="chart-wrap"><canvas id="lpChartDaily"></canvas></div>
+  </div>
+</div>
+
+<!-- Site Summary -->
+<div class="site-summary-section" id="lpSiteSummarySection">
+  <div class="chart-title" style="font-size:.82rem;">Ringkasan per Site</div>
+  <div class="chart-subtitle" style="font-size:.66rem;color:#64748b;margin-top:2px;">On Time Loading rate & avg loading time per site DC</div>
+  <div class="site-summary-grid" id="lpSiteSummaryGrid"></div>
+</div>
+
+<!-- Bottom Tables -->
+<div class="bottom-section">
+  <div class="chart-card" style="flex:1 1 100%;">
+    <div class="chart-header">
+      <div><div class="chart-title">Detail Trip</div><div class="chart-subtitle">Tunggu Muat · Loading Time · Aging DC per trip (maks 100)</div></div>
+    </div>
+    <div class="table-scroll">
+      <table><thead><tr><th>No SI</th><th>Armada</th><th>Tunggu</th><th>Loading</th><th>Aging DC</th><th>Status</th></tr></thead>
+      <tbody id="lpDetailTableBody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="footer-note">Source: <span>GSheet – NDC Loading Data</span> &nbsp;|&nbsp; On Time = Loading Time ≤ Target Armada/Site &nbsp;|&nbsp; Total <span id="lpFooterTotal">—</span> trips</div>
+  <div class="footer-note">Diperbarui: <span id="lpLastUpdated">—</span></div>
+</div>
+
+</div><!-- end tab-loading -->
+
+<!-- TAB: Fulfillment Rate -->
+<div class="tab-content" id="tab-fulfillment">
+
+<!-- FR Filters -->
+<div class="filters" id="frFiltersBar">
+  <div class="filter-group">
+    <label>Supply Site</label>
+    <div class="ms-wrap" id="frMsSite">
+      <button class="ms-trigger" onclick="toggleMS('frMsSite')" type="button"><span class="ms-label">Semua Site</span><span class="ms-caret">▾</span></button>
+      <div class="ms-body"></div>
+    </div>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <label>Bulan</label>
+    <div class="ms-wrap" id="frMsMonth">
+      <button class="ms-trigger" onclick="toggleMS('frMsMonth')" type="button"><span class="ms-label">Semua Bulan</span><span class="ms-caret">▾</span></button>
+      <div class="ms-body"></div>
+    </div>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <label>Batch</label>
+    <div class="ms-wrap" id="frMsBatch">
+      <button class="ms-trigger" onclick="toggleMS('frMsBatch')" type="button"><span class="ms-label">Semua Batch</span><span class="ms-caret">▾</span></button>
+      <div class="ms-body"></div>
+    </div>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <label>Moda</label>
+    <div class="ms-wrap" id="frMsModa">
+      <button class="ms-trigger" onclick="toggleMS('frMsModa')" type="button"><span class="ms-label">Semua Moda</span><span class="ms-caret">▾</span></button>
+      <div class="ms-body"></div>
+    </div>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <label>Dist. Channel</label>
+    <div class="ms-wrap" id="frMsDC">
+      <button class="ms-trigger" onclick="toggleMS('frMsDC')" type="button"><span class="ms-label">Semua DC</span><span class="ms-caret">▾</span></button>
+      <div class="ms-body"></div>
+    </div>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <label>BU</label>
+    <div class="ms-wrap" id="frMsBU">
+      <button class="ms-trigger" onclick="toggleMS('frMsBU')" type="button"><span class="ms-label">Semua BU</span><span class="ms-caret">▾</span></button>
+      <div class="ms-body"></div>
+    </div>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <label>Vendor</label>
+    <div class="ms-wrap" id="frMsVendor">
+      <button class="ms-trigger" onclick="toggleMS('frMsVendor')" type="button"><span class="ms-label">Semua Vendor</span><span class="ms-caret">▾</span></button>
+      <div class="ms-body"></div>
+    </div>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <label>Tanggal</label>
+    <div class="ms-wrap" id="frMsDate">
+      <button class="ms-trigger" onclick="toggleMS('frMsDate')" type="button"><span class="ms-label">Semua Tgl</span><span class="ms-caret">▾</span></button>
+      <div class="ms-body"></div>
+    </div>
+  </div>
+  <button class="reset-btn" onclick="resetFRFilters()">↺ Reset</button>
+  <div class="filter-count">Menampilkan: <span id="frFilterCount">0</span> trips</div>
+</div>
+
+<!-- KPI Cards -->
+<div class="kpi-section">
+  <div class="kpi-card blue">
+    <div class="kpi-icon">📦</div>
+    <div class="kpi-label">Total Trip</div>
+    <div class="kpi-value" id="frKpiTotal">0</div>
+    <div class="kpi-sub">Hasil filter aktif</div>
+  </div>
+  <div class="kpi-card green">
+    <div class="kpi-icon">🎯</div>
+    <div class="kpi-label">Jumlah Hit</div>
+    <div class="kpi-value" id="frKpiHit">0</div>
+    <div class="kpi-sub">Tgl Checkin ≤ Req Stuffing</div>
+  </div>
+  <div class="kpi-card red">
+    <div class="kpi-icon">❌</div>
+    <div class="kpi-label">Jumlah Mis</div>
+    <div class="kpi-value" id="frKpiMis">0</div>
+    <div class="kpi-sub">Tgl Checkin &gt; Req Stuffing</div>
+  </div>
+  <div class="kpi-card purple">
+    <div class="kpi-icon">📊</div>
+    <div class="kpi-label">Fulfillment Rate</div>
+    <div class="kpi-value" id="frKpiRate" style="color:#22d3ee">0%</div>
+    <div class="kpi-sub" id="frKpiRateSub">—</div>
+  </div>
+</div>
+
+<!-- Daily Chart -->
+<div class="charts-section">
+  <div class="chart-card">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Fulfillment Rate per Hari</div>
+        <div class="chart-subtitle">% trip terpenuhi — Tanggal Checkin ≤ Tanggal Req Stuffing (per Distribution Channel)</div>
+      </div>
+      <div class="chart-tag" id="frChartTag">All</div>
+    </div>
+    <div class="chart-wrap"><canvas id="frChartDaily"></canvas></div>
+  </div>
+</div>
+
+<!-- DC Summary -->
+<div class="site-summary-section" id="frDCSummarySection">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+    <div>
+      <div class="chart-title" style="font-size:.82rem;">Ringkasan per Distribution Channel</div>
+      <div class="chart-subtitle" style="font-size:.66rem;color:#64748b;margin-top:2px;">Fulfillment rate per tujuan DC sesuai filter aktif</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <input type="text" id="frDCSearch" placeholder="🔍 Cari tujuan…" oninput="frApplyFilters()"
+        style="background:#0f172a;border:1px solid #334155;color:#e2e8f0;padding:5px 11px;border-radius:7px;font-size:.73rem;outline:none;width:148px;transition:border-color .15s;"
+        onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#334155'">
+      <select id="frDCSortBy" onchange="frApplyFilters()"
+        style="background:#0f172a;border:1px solid #334155;color:#e2e8f0;padding:5px 9px;border-radius:7px;font-size:.73rem;cursor:pointer;outline:none;">
+        <option value="total_desc">Total Trip ↓</option>
+        <option value="rate_desc">Rate ↓ Tertinggi</option>
+        <option value="rate_asc">Rate ↑ Terendah</option>
+        <option value="name_asc">Nama A–Z</option>
+      </select>
+    </div>
+  </div>
+  <div class="site-summary-grid" id="frDCSummaryGrid" style="margin-top:10px;"></div>
+  <div id="frDCSearchEmpty" style="display:none;color:#64748b;font-size:.75rem;padding:10px 0;text-align:center;">Tidak ada DC yang cocok dengan pencarian.</div>
+</div>
+
+<div class="footer">
+  <div class="footer-note">Source: <span>GSheet – Data Dashboard OTA</span> &nbsp;|&nbsp; Hit = Tgl Checkin ≤ Tgl Req Stuffing &nbsp;|&nbsp; Total <span id="frFooterTotal">—</span> trips</div>
+  <div class="footer-note">Diperbarui: <span id="frLastUpdated">—</span></div>
+</div>
+
+</div><!-- end tab-fulfillment -->
+
+<!-- TAB: Analytics -->
+<div class="tab-content" id="tab-analytics">
+  <div class="coming-soon">
+    <div class="coming-soon-icon">📊</div>
+    <div class="coming-soon-title">Analytics</div>
+    <div class="coming-soon-sub">Dashboard analitik mendalam — trend historis, komparasi periode, dan insight performa vendor secara keseluruhan.</div>
+    <div class="coming-soon-tag">🚧 Coming Soon</div>
+  </div>
+</div>
+
+<script>
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQZkfq5c08qzyeoLlTwE-DahryQJIKQXfmhjKOW2Wiqf0tZKaazagRqR7sZH_n2z9fjUPwcDcyo_4-l/pub?output=csv';
+let D = {"sites":["Cikande"],"months":["Jan"],"modas":["LAND"],"batches":["B3","B4","B5","B7"],"summary":{"Cikande|Jan|LAND|B4":{"total":55,"ot":10,"late":45},"Cikande|Jan|LAND|B3":{"total":112,"ot":8,"late":104},"Cikande|Jan|LAND|B5":{"total":3,"ot":0,"late":3},"Cikande|Jan|LAND|B7":{"total":7,"ot":0,"late":7}},"daily":{"Cikande|Jan|LAND|B4|5":{"total":9,"ot":0,"late":9},"Cikande|Jan|LAND|B4|6":{"total":6,"ot":0,"late":6},"Cikande|Jan|LAND|B3|6":{"total":1,"ot":0,"late":1},"Cikande|Jan|LAND|B5|6":{"total":1,"ot":0,"late":1},"Cikande|Jan|LAND|B4|7":{"total":6,"ot":1,"late":5},"Cikande|Jan|LAND|B7|8":{"total":7,"ot":0,"late":7},"Cikande|Jan|LAND|B3|9":{"total":7,"ot":1,"late":6},"Cikande|Jan|LAND|B4|10":{"total":3,"ot":1,"late":2},"Cikande|Jan|LAND|B3|12":{"total":8,"ot":1,"late":7},"Cikande|Jan|LAND|B4|13":{"total":8,"ot":0,"late":8},"Cikande|Jan|LAND|B4|14":{"total":8,"ot":3,"late":5},"Cikande|Jan|LAND|B3|15":{"total":7,"ot":0,"late":7},"Cikande|Jan|LAND|B3|16":{"total":6,"ot":0,"late":6},"Cikande|Jan|LAND|B4|17":{"total":4,"ot":2,"late":2},"Cikande|Jan|LAND|B5|17":{"total":2,"ot":0,"late":2},"Cikande|Jan|LAND|B3|19":{"total":6,"ot":0,"late":6},"Cikande|Jan|LAND|B3|20":{"total":6,"ot":0,"late":6},"Cikande|Jan|LAND|B4|20":{"total":2,"ot":0,"late":2},"Cikande|Jan|LAND|B4|21":{"total":3,"ot":0,"late":3},"Cikande|Jan|LAND|B3|21":{"total":6,"ot":0,"late":6},"Cikande|Jan|LAND|B3|22":{"total":8,"ot":0,"late":8},"Cikande|Jan|LAND|B3|23":{"total":8,"ot":0,"late":8},"Cikande|Jan|LAND|B3|24":{"total":9,"ot":0,"late":9},"Cikande|Jan|LAND|B4|24":{"total":1,"ot":0,"late":1},"Cikande|Jan|LAND|B3|25":{"total":4,"ot":0,"late":4},"Cikande|Jan|LAND|B3|26":{"total":4,"ot":0,"late":4},"Cikande|Jan|LAND|B4|26":{"total":5,"ot":3,"late":2},"Cikande|Jan|LAND|B3|27":{"total":10,"ot":2,"late":8},"Cikande|Jan|LAND|B3|28":{"total":11,"ot":1,"late":10},"Cikande|Jan|LAND|B3|29":{"total":10,"ot":3,"late":7},"Cikande|Jan|LAND|B3|30":{"total":1,"ot":0,"late":1}},"vendor":{"Cikande|Jan|LAND|B4|BBR":{"total":39,"ot":9,"late":30},"Cikande|Jan|LAND|B4|JPT":{"total":6,"ot":1,"late":5},"Cikande|Jan|LAND|B3|BBR":{"total":80,"ot":5,"late":75},"Cikande|Jan|LAND|B5|BBR":{"total":3,"ot":0,"late":3},"Cikande|Jan|LAND|B4|CGS":{"total":4,"ot":0,"late":4},"Cikande|Jan|LAND|B7|BBR":{"total":3,"ot":0,"late":3},"Cikande|Jan|LAND|B7|DMM":{"total":2,"ot":0,"late":2},"Cikande|Jan|LAND|B7|JPT":{"total":2,"ot":0,"late":2},"Cikande|Jan|LAND|B3|DMM":{"total":15,"ot":2,"late":13},"Cikande|Jan|LAND|B4|DMM":{"total":6,"ot":0,"late":6},"Cikande|Jan|LAND|B3|JPT":{"total":15,"ot":1,"late":14},"Cikande|Jan|LAND|B3|DINOYO":{"total":2,"ot":0,"late":2}},"detail":{"Cikande|Jan|LAND|B4":[{"noSI":"260105HS001","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"5 Jan 26 15:00","checkin":"05 Jan 26 08:04","ota":false,"day":5},{"noSI":"260105HS002","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"5 Jan 26 15:00","checkin":"05 Jan 26 10:25","ota":false,"day":5},{"noSI":"260105HS003","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"5 Jan 26 15:00","checkin":"05 Jan 26 10:31","ota":false,"day":5},{"noSI":"260105HS004","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"5 Jan 26 16:00","checkin":"05 Jan 26 08:53","ota":false,"day":5},{"noSI":"260105HS005","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"5 Jan 26 16:00","checkin":"05 Jan 26 08:58","ota":false,"day":5},{"noSI":"260105HS006","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"5 Jan 26 16:00","checkin":"05 Jan 26 08:47","ota":false,"day":5},{"noSI":"260105HS007","vendor":"JPT","tujuan":"Sidoarjo","area":"Jawa Timur","req":"5 Jan 26 15:00","checkin":"05 Jan 26 06:36","ota":false,"day":5},{"noSI":"260105HS008","vendor":"JPT","tujuan":"Sidoarjo","area":"Jawa Timur","req":"5 Jan 26 15:00","checkin":"05 Jan 26 09:10","ota":false,"day":5},{"noSI":"260105HS009","vendor":"JPT","tujuan":"Sidoarjo","area":"Jawa Timur","req":"5 Jan 26 15:00","checkin":"05 Jan 26 06:39","ota":false,"day":5},{"noSI":"260106HS005","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"6 Jan 26 15:00","checkin":"06 Jan 26 19:32","ota":false,"day":6},{"noSI":"260106HS007","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"6 Jan 26 15:00","checkin":"06 Jan 26 08:37","ota":false,"day":6},{"noSI":"260106HS009","vendor":"CGS","tujuan":"Bekasi","area":"Jabodetabek","req":"6 Jan 26 16:00","checkin":"06 Jan 26 08:15","ota":false,"day":6},{"noSI":"260106HS010","vendor":"CGS","tujuan":"Bekasi","area":"Jabodetabek","req":"6 Jan 26 16:00","checkin":"06 Jan 26 08:13","ota":false,"day":6},{"noSI":"260106HS011","vendor":"CGS","tujuan":"Bekasi","area":"Jabodetabek","req":"6 Jan 26 16:00","checkin":"06 Jan 26 08:12","ota":false,"day":6},{"noSI":"260106HS012","vendor":"CGS","tujuan":"Bekasi","area":"Jabodetabek","req":"6 Jan 26 16:00","checkin":"06 Jan 26 08:11","ota":false,"day":6},{"noSI":"260107HS001","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"7 Jan 26 15:00","checkin":"07 Jan 26 08:28","ota":false,"day":7},{"noSI":"260107HS002","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"7 Jan 26 15:00","checkin":"07 Jan 26 06:23","ota":false,"day":7},{"noSI":"260107HS003","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"7 Jan 26 15:00","checkin":"07 Jan 26 06:22","ota":true,"day":7},{"noSI":"260107HS004","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"7 Jan 26 16:00","checkin":"07 Jan 26 13:00","ota":false,"day":7},{"noSI":"260107HS005","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"7 Jan 26 16:00","checkin":"07 Jan 26 13:07","ota":false,"day":7},{"noSI":"260107HS006","vendor":"JPT","tujuan":"Sidoarjo","area":"Jawa Timur","req":"7 Jan 26 16:00","checkin":"07 Jan 26 06:55","ota":false,"day":7},{"noSI":"260110HS003","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"10 Jan 26 15:00","checkin":"10 Jan 26 13:20","ota":false,"day":10},{"noSI":"260110HS001","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"10 Jan 26 15:00","checkin":"10 Jan 26 09:21","ota":true,"day":10},{"noSI":"260110HS002","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"10 Jan 26 15:00","checkin":"10 Jan 26 09:44","ota":false,"day":10},{"noSI":"260113HS009","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"13 Jan 26 16:00","checkin":"13 Jan 26 15:13","ota":false,"day":13},{"noSI":"260113HS010","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"13 Jan 26 16:00","checkin":"13 Jan 26 14:50","ota":false,"day":13},{"noSI":"260113HS002","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"13 Jan 26 16:00","checkin":"13 Jan 26 19:14","ota":false,"day":13},{"noSI":"260113HS003","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"13 Jan 26 16:00","checkin":"13 Jan 26 19:17","ota":false,"day":13},{"noSI":"260113HS004","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"13 Jan 26 16:00","checkin":"13 Jan 26 14:37","ota":false,"day":13},{"noSI":"260113HS005","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"13 Jan 26 16:00","checkin":"13 Jan 26 14:42","ota":false,"day":13},{"noSI":"260113HS006","vendor":"DMM","tujuan":"Bekasi","area":"Jabodetabek","req":"13 Jan 26 16:00","checkin":"13 Jan 26 18:23","ota":false,"day":13},{"noSI":"260113HS007","vendor":"DMM","tujuan":"Bekasi","area":"Jabodetabek","req":"13 Jan 26 16:00","checkin":"13 Jan 26 16:49","ota":false,"day":13},{"noSI":"260114HS005","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"14 Jan 26 16:00","checkin":"14 Jan 26 11:03","ota":false,"day":14},{"noSI":"260114HS006","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"14 Jan 26 16:00","checkin":"14 Jan 26 14:34","ota":false,"day":14},{"noSI":"260114HS001","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"14 Jan 26 15:00","checkin":"14 Jan 26 08:15","ota":true,"day":14},{"noSI":"260114HS002","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"14 Jan 26 15:00","checkin":"14 Jan 26 14:10","ota":false,"day":14},{"noSI":"260114HS004","vendor":"JPT","tujuan":"Sidoarjo","area":"Jawa Timur","req":"14 Jan 26 16:00","checkin":"14 Jan 26 10:48","ota":true,"day":14},{"noSI":"260114HS008","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"14 Jan 26 15:00","checkin":"14 Jan 26 10:50","ota":false,"day":14},{"noSI":"260114HS009","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"14 Jan 26 15:00","checkin":"14 Jan 26 11:13","ota":true,"day":14},{"noSI":"260114HS010","vendor":"JPT","tujuan":"Sidoarjo","area":"Jawa Timur","req":"14 Jan 26 16:00","checkin":"14 Jan 26 08:28","ota":false,"day":14},{"noSI":"260117HS004","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"17 Jan 26 16:00","checkin":"17 Jan 26 08:31","ota":true,"day":17},{"noSI":"260117HS005","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"17 Jan 26 16:00","checkin":"17 Jan 26 06:14","ota":true,"day":17},{"noSI":"260117HS006","vendor":"DMM","tujuan":"Bekasi","area":"Jabodetabek","req":"17 Jan 26 16:00","checkin":"17 Jan 26 16:04","ota":false,"day":17},{"noSI":"260117HS007","vendor":"DMM","tujuan":"Bekasi","area":"Jabodetabek","req":"17 Jan 26 16:00","checkin":"17 Jan 26 14:45","ota":false,"day":17},{"noSI":"260120HS006","vendor":"DMM","tujuan":"Bekasi","area":"Jabodetabek","req":"20 Jan 26 15:00","checkin":"20 Jan 26 07:12","ota":false,"day":20},{"noSI":"260120HS007","vendor":"DMM","tujuan":"Bekasi","area":"Jabodetabek","req":"20 Jan 26 15:00","checkin":"20 Jan 26 07:14","ota":false,"day":20},{"noSI":"260121HS001","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"21 Jan 26 15:00","checkin":"21 Jan 26 11:00","ota":false,"day":21},{"noSI":"260121HS002","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"21 Jan 26 15:00","checkin":"21 Jan 26 11:01","ota":false,"day":21},{"noSI":"260120HS057","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"21 Jan 26 16:35","checkin":"20 Jan 26 16:50","ota":false,"day":21},{"noSI":"260124HS003","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"24 Jan 26 15:00","checkin":"24 Jan 26 07:20","ota":false,"day":24},{"noSI":"260126HS006","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"26 Jan 26 15:00","checkin":"26 Jan 26 09:33","ota":true,"day":26},{"noSI":"260126HS007","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"26 Jan 26 15:00","checkin":"26 Jan 26 06:08","ota":true,"day":26},{"noSI":"260126HS009","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"26 Jan 26 15:00","checkin":"26 Jan 26 10:57","ota":true,"day":26},{"noSI":"260126HS010","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"26 Jan 26 15:00","checkin":"26 Jan 26 12:33","ota":false,"day":26},{"noSI":"260126HS011","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"26 Jan 26 15:00","checkin":"26 Jan 26 13:19","ota":false,"day":26}],"Cikande|Jan|LAND|B3":[{"noSI":"260106HS032","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"6 Jan 26 13:00","checkin":"06 Jan 26 10:49","ota":false,"day":6},{"noSI":"260109HS001","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"9 Jan 26 13:00","checkin":"09 Jan 26 08:30","ota":false,"day":9},{"noSI":"260109HS002","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"9 Jan 26 13:00","checkin":"09 Jan 26 08:32","ota":false,"day":9},{"noSI":"260109HS003","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"9 Jan 26 13:00","checkin":"09 Jan 26 08:49","ota":false,"day":9},{"noSI":"260109HS004","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"9 Jan 26 13:00","checkin":"08 Jan 26 20:30","ota":true,"day":9},{"noSI":"260109HS005","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"9 Jan 26 13:00","checkin":"09 Jan 26 08:50","ota":false,"day":9},{"noSI":"260109HS006","vendor":"DMM","tujuan":"Bekasi","area":"Jabodetabek","req":"9 Jan 26 13:00","checkin":"09 Jan 26 15:49","ota":false,"day":9},{"noSI":"260109HS007","vendor":"DMM","tujuan":"Bekasi","area":"Jabodetabek","req":"9 Jan 26 13:00","checkin":"09 Jan 26 19:55","ota":false,"day":9},{"noSI":"260110HS056","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"12 Jan 26 13:00","checkin":"12 Jan 26 10:08","ota":false,"day":12},{"noSI":"260112HS006","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"12 Jan 26 13:00","checkin":"12 Jan 26 10:25","ota":true,"day":12},{"noSI":"260112HS007","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"12 Jan 26 13:00","checkin":"12 Jan 26 13:44","ota":false,"day":12},{"noSI":"260112HS001","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"12 Jan 26 13:00","checkin":"12 Jan 26 09:50","ota":false,"day":12},{"noSI":"260112HS003","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"12 Jan 26 13:00","checkin":"12 Jan 26 10:32","ota":false,"day":12},{"noSI":"260112HS004","vendor":"DMM","tujuan":"Bekasi","area":"Jabodetabek","req":"12 Jan 26 13:00","checkin":"12 Jan 26 15:49","ota":false,"day":12},{"noSI":"260112HS005","vendor":"DMM","tujuan":"Bekasi","area":"Jabodetabek","req":"12 Jan 26 13:00","checkin":"12 Jan 26 17:44","ota":false,"day":12},{"noSI":"260112HS018","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"12 Jan 26 13:00","checkin":"12 Jan 26 10:24","ota":false,"day":12},{"noSI":"260115HS003","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"15 Jan 26 13:00","checkin":"15 Jan 26 09:07","ota":false,"day":15},{"noSI":"260115HS004","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"15 Jan 26 13:00","checkin":"15 Jan 26 08:50","ota":false,"day":15},{"noSI":"260115HS005","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"15 Jan 26 13:00","checkin":"15 Jan 26 09:52","ota":false,"day":15},{"noSI":"260115HS006","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"15 Jan 26 13:00","checkin":"15 Jan 26 13:31","ota":false,"day":15},{"noSI":"260115HS007","vendor":"JPT","tujuan":"Sidoarjo","area":"Jawa Timur","req":"15 Jan 26 13:00","checkin":"15 Jan 26 15:29","ota":false,"day":15},{"noSI":"260113HS008","vendor":"JPT","tujuan":"Sidoarjo","area":"Jawa Timur","req":"16 Jan 26 13:00","checkin":"16 Jan 26 10:09","ota":false,"day":16},{"noSI":"260116HS002","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"16 Jan 26 13:00","checkin":"16 Jan 26 06:08","ota":false,"day":16},{"noSI":"260116HS003","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"16 Jan 26 13:00","checkin":"16 Jan 26 09:24","ota":false,"day":16},{"noSI":"260116HS004","vendor":"DMM","tujuan":"Bekasi","area":"Jabodetabek","req":"16 Jan 26 13:00","checkin":"16 Jan 26 09:38","ota":false,"day":16},{"noSI":"260116HS005","vendor":"DMM","tujuan":"Bekasi","area":"Jabodetabek","req":"16 Jan 26 13:00","checkin":"16 Jan 26 13:19","ota":false,"day":16},{"noSI":"260119HS004","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"19 Jan 26 13:00","checkin":"19 Jan 26 07:58","ota":false,"day":19},{"noSI":"260119HS005","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"19 Jan 26 13:00","checkin":"19 Jan 26 09:09","ota":false,"day":19},{"noSI":"260119HS006","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"19 Jan 26 13:00","checkin":"19 Jan 26 07:04","ota":false,"day":19},{"noSI":"260119HS007","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"19 Jan 26 13:00","checkin":"19 Jan 26 08:58","ota":false,"day":19},{"noSI":"260119HS008","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"19 Jan 26 13:00","checkin":"19 Jan 26 09:00","ota":false,"day":19},{"noSI":"260119HS009","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"19 Jan 26 13:00","checkin":"19 Jan 26 08:01","ota":false,"day":19},{"noSI":"260120HS009","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"20 Jan 26 13:00","checkin":"20 Jan 26 08:14","ota":false,"day":20},{"noSI":"260120HS010","vendor":"JPT","tujuan":"Sidoarjo","area":"Jawa Timur","req":"20 Jan 26 13:00","checkin":"20 Jan 26 08:33","ota":false,"day":20},{"noSI":"260119HS048","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"20 Jan 26 13:00","checkin":"20 Jan 26 08:41","ota":false,"day":20},{"noSI":"260120HS004","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"20 Jan 26 13:00","checkin":"20 Jan 26 11:27","ota":false,"day":20},{"noSI":"260120HS005","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"20 Jan 26 13:00","checkin":"20 Jan 26 08:28","ota":false,"day":20},{"noSI":"260120HS008","vendor":"JPT","tujuan":"Sidoarjo","area":"Jawa Timur","req":"20 Jan 26 13:00","checkin":"20 Jan 26 08:55","ota":false,"day":20},{"noSI":"260121HS003","vendor":"JPT","tujuan":"Sidoarjo","area":"Jawa Timur","req":"21 Jan 26 13:00","checkin":"21 Jan 26 09:27","ota":false,"day":21},{"noSI":"260121HS004","vendor":"DMM","tujuan":"Bekasi","area":"Jabodetabek","req":"21 Jan 26 13:00","checkin":"21 Jan 26 08:46","ota":false,"day":21},{"noSI":"260121HS005","vendor":"DMM","tujuan":"Bekasi","area":"Jabodetabek","req":"21 Jan 26 13:00","checkin":"21 Jan 26 19:00","ota":false,"day":21},{"noSI":"260121HS006","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"21 Jan 26 13:00","checkin":"21 Jan 26 11:01","ota":false,"day":21},{"noSI":"260121HS007","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"21 Jan 26 13:00","checkin":"21 Jan 26 08:42","ota":false,"day":21},{"noSI":"260121HS008","vendor":"JPT","tujuan":"Sidoarjo","area":"Jawa Timur","req":"21 Jan 26 11:00","checkin":"21 Jan 26 09:29","ota":false,"day":21},{"noSI":"260122HS001","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"22 Jan 26 13:00","checkin":"22 Jan 26 13:31","ota":false,"day":22},{"noSI":"260122HS002","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"22 Jan 26 13:00","checkin":"22 Jan 26 14:12","ota":false,"day":22},{"noSI":"260122HS003","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"22 Jan 26 13:00","checkin":"22 Jan 26 13:29","ota":false,"day":22},{"noSI":"260122HS006","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"22 Jan 26 13:00","checkin":"21 Jan 26 16:45","ota":false,"day":22},{"noSI":"260122HS007","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"22 Jan 26 13:00","checkin":"22 Jan 26 16:41","ota":false,"day":22},{"noSI":"260122HS008","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"22 Jan 26 13:00","checkin":"22 Jan 26 14:37","ota":false,"day":22},{"noSI":"260122HS009","vendor":"JPT","tujuan":"Sidoarjo","area":"Jawa Timur","req":"22 Jan 26 13:00","checkin":"22 Jan 26 14:47","ota":false,"day":22},{"noSI":"260122HS005","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"22 Jan 26 13:00","checkin":"21 Jan 26 16:48","ota":false,"day":22},{"noSI":"260123HS001","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"23 Jan 26 13:00","checkin":"23 Jan 26 09:57","ota":false,"day":23},{"noSI":"260123HS002","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"23 Jan 26 13:00","checkin":"23 Jan 26 10:00","ota":false,"day":23},{"noSI":"260123HS003","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"23 Jan 26 13:00","checkin":"23 Jan 26 09:59","ota":false,"day":23},{"noSI":"260122HS004","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"23 Jan 26 13:00","checkin":"22 Jan 26 16:39","ota":false,"day":23},{"noSI":"260122HS010","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"23 Jan 26 13:00","checkin":"22 Jan 26 16:41","ota":false,"day":23},{"noSI":"260122HS041","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"23 Jan 26 13:00","checkin":"23 Jan 26 10:48","ota":false,"day":23},{"noSI":"260123HS008","vendor":"JPT","tujuan":"Sidoarjo","area":"Jawa Timur","req":"23 Jan 26 13:00","checkin":"23 Jan 26 10:33","ota":false,"day":23},{"noSI":"260123HS009","vendor":"JPT","tujuan":"Sidoarjo","area":"Jawa Timur","req":"23 Jan 26 13:00","checkin":"23 Jan 26 09:55","ota":false,"day":23},{"noSI":"260124HS005","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"24 Jan 26 13:00","checkin":"24 Jan 26 08:16","ota":false,"day":24},{"noSI":"260124HS006","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"24 Jan 26 13:00","checkin":"24 Jan 26 13:18","ota":false,"day":24},{"noSI":"260124HS007","vendor":"JPT","tujuan":"Sidoarjo","area":"Jawa Timur","req":"24 Jan 26 13:00","checkin":"24 Jan 26 08:35","ota":false,"day":24},{"noSI":"260123HS004","vendor":"DMM","tujuan":"Bekasi","area":"Jabodetabek","req":"24 Jan 26 13:00","checkin":"24 Jan 26 16:05","ota":false,"day":24},{"noSI":"260123HS005","vendor":"DMM","tujuan":"Bekasi","area":"Jabodetabek","req":"24 Jan 26 13:00","checkin":"24 Jan 26 16:21","ota":false,"day":24},{"noSI":"260123HS038","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"24 Jan 26 13:00","checkin":"24 Jan 26 13:50","ota":false,"day":24},{"noSI":"260124HS001","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"24 Jan 26 13:00","checkin":"24 Jan 26 07:19","ota":false,"day":24},{"noSI":"260124HS002","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"24 Jan 26 13:00","checkin":"24 Jan 26 07:17","ota":false,"day":24},{"noSI":"260124HS004","vendor":"JPT","tujuan":"Sidoarjo","area":"Jawa Timur","req":"24 Jan 26 13:00","checkin":"24 Jan 26 08:41","ota":false,"day":24},{"noSI":"260115HS001","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"15 Jan 26 13:00","checkin":"15 Jan 26 06:08","ota":false,"day":15},{"noSI":"260115HS002","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"15 Jan 26 13:00","checkin":"15 Jan 26 06:33","ota":false,"day":15},{"noSI":"260116HS001","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"16 Jan 26 13:00","checkin":"16 Jan 26 06:06","ota":false,"day":16},{"noSI":"260125HS004","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"25 Jan 26 13:00","checkin":"25 Jan 26 07:05","ota":false,"day":25},{"noSI":"260125HS030","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"25 Jan 26 13:00","checkin":"25 Jan 26 07:06","ota":false,"day":25},{"noSI":"260125HS002","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"25 Jan 26 13:00","checkin":"25 Jan 26 09:45","ota":false,"day":25},{"noSI":"260125HS003","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"25 Jan 26 13:00","checkin":"25 Jan 26 07:08","ota":false,"day":25},{"noSI":"260126HS008","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"26 Jan 26 13:00","checkin":"26 Jan 26 12:30","ota":false,"day":26},{"noSI":"260126HS003","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"26 Jan 26 13:00","checkin":"26 Jan 26 09:01","ota":false,"day":26},{"noSI":"260126HS004","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"26 Jan 26 13:00","checkin":"26 Jan 26 08:59","ota":false,"day":26},{"noSI":"260126HS005","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"26 Jan 26 13:00","checkin":"26 Jan 26 08:34","ota":false,"day":26},{"noSI":"260127HS001","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"27 Jan 26 13:00","checkin":"27 Jan 26 06:32","ota":false,"day":27},{"noSI":"260127HS012","vendor":"JPT","tujuan":"Sidoarjo","area":"Jawa Timur","req":"27 Jan 26 13:00","checkin":"27 Jan 26 04:29","ota":false,"day":27},{"noSI":"260127HS003","vendor":"DMM","tujuan":"Bekasi","area":"Jabodetabek","req":"27 Jan 26 13:00","checkin":"27 Jan 26 10:02","ota":false,"day":27},{"noSI":"260127HS004","vendor":"DMM","tujuan":"Bekasi","area":"Jabodetabek","req":"27 Jan 26 13:00","checkin":"27 Jan 26 09:06","ota":false,"day":27},{"noSI":"260127HS005","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"27 Jan 26 13:00","checkin":"27 Jan 26 06:33","ota":true,"day":27},{"noSI":"260127HS006","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"27 Jan 26 13:00","checkin":"27 Jan 26 06:33","ota":true,"day":27},{"noSI":"260127HS007","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"27 Jan 26 13:00","checkin":"27 Jan 26 12:35","ota":false,"day":27},{"noSI":"260127HS008","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"27 Jan 26 13:00","checkin":"27 Jan 26 13:55","ota":false,"day":27},{"noSI":"260127HS009","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"27 Jan 26 13:00","checkin":"27 Jan 26 13:32","ota":false,"day":27},{"noSI":"260127HS010","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"27 Jan 26 13:00","checkin":"27 Jan 26 14:04","ota":false,"day":27},{"noSI":"260128HS001","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"28 Jan 26 13:00","checkin":"28 Jan 26 08:33","ota":false,"day":28},{"noSI":"260128HS002","vendor":"JPT","tujuan":"Sidoarjo","area":"Jawa Timur","req":"28 Jan 26 13:00","checkin":"28 Jan 26 09:05","ota":false,"day":28},{"noSI":"260128HS010","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"28 Jan 26 13:00","checkin":"28 Jan 26 18:26","ota":false,"day":28},{"noSI":"260127HS011","vendor":"JPT","tujuan":"Sidoarjo","area":"Jawa Timur","req":"28 Jan 26 13:00","checkin":"27 Jan 26 18:54","ota":true,"day":28},{"noSI":"260128HS003","vendor":"DMM","tujuan":"Bekasi","area":"Jabodetabek","req":"28 Jan 26 13:00","checkin":"28 Jan 26 13:27","ota":false,"day":28},{"noSI":"260128HS004","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"28 Jan 26 13:00","checkin":"28 Jan 26 08:30","ota":false,"day":28},{"noSI":"260128HS005","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"28 Jan 26 13:00","checkin":"28 Jan 26 08:32","ota":false,"day":28},{"noSI":"260128HS006","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"28 Jan 26 13:00","checkin":"28 Jan 26 10:39","ota":false,"day":28},{"noSI":"260128HS007","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"28 Jan 26 13:00","checkin":"28 Jan 26 14:34","ota":false,"day":28},{"noSI":"260128HS008","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"28 Jan 26 13:00","checkin":"28 Jan 26 14:30","ota":false,"day":28},{"noSI":"260128HS009","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"28 Jan 26 13:00","checkin":"28 Jan 26 14:08","ota":false,"day":28},{"noSI":"260129HS001","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"29 Jan 26 13:00","checkin":"29 Jan 26 06:58","ota":false,"day":29},{"noSI":"260129HS002","vendor":"JPT","tujuan":"Sidoarjo","area":"Jawa Timur","req":"29 Jan 26 13:00","checkin":"29 Jan 26 10:00","ota":false,"day":29},{"noSI":"260129HS003","vendor":"DMM","tujuan":"Bekasi","area":"Jabodetabek","req":"29 Jan 26 13:00","checkin":"29 Jan 26 07:01","ota":true,"day":29},{"noSI":"260129HS004","vendor":"DMM","tujuan":"Bekasi","area":"Jabodetabek","req":"29 Jan 26 13:00","checkin":"29 Jan 26 07:00","ota":true,"day":29},{"noSI":"260129HS005","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"29 Jan 26 13:00","checkin":"29 Jan 26 08:19","ota":false,"day":29},{"noSI":"260129HS006","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"29 Jan 26 13:00","checkin":"29 Jan 26 10:38","ota":false,"day":29},{"noSI":"260129HS007","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"29 Jan 26 13:00","checkin":"29 Jan 26 13:50","ota":false,"day":29},{"noSI":"260129HS008","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"29 Jan 26 13:00","checkin":"29 Jan 26 14:44","ota":true,"day":29},{"noSI":"260129HS009","vendor":"DINOYO","tujuan":"Sidoarjo","area":"Jawa Timur","req":"29 Jan 26 13:00","checkin":"29 Jan 26 08:41","ota":false,"day":29},{"noSI":"260129HS010","vendor":"DINOYO","tujuan":"Sidoarjo","area":"Jawa Timur","req":"29 Jan 26 13:00","checkin":"29 Jan 26 12:53","ota":false,"day":29},{"noSI":"260130HS004","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"30 Jan 26 13:00","checkin":"30 Jan 26 07:07","ota":false,"day":30}],"Cikande|Jan|LAND|B5":[{"noSI":"260106HS063","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"6 Jan 26 18:49","checkin":"06 Jan 26 19:50","ota":false,"day":6},{"noSI":"260117HS036","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"17 Jan 26 20:00","checkin":"17 Jan 26 16:00","ota":false,"day":17},{"noSI":"260117HS037","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"17 Jan 26 20:00","checkin":"17 Jan 26 16:02","ota":false,"day":17}],"Cikande|Jan|LAND|B7":[{"noSI":"260107HS040","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"8 Jan 26 00:00","checkin":"08 Jan 26 08:29","ota":false,"day":8},{"noSI":"260108HS001","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"8 Jan 26 00:00","checkin":"08 Jan 26 08:19","ota":false,"day":8},{"noSI":"260108HS002","vendor":"BBR","tujuan":"Bekasi","area":"Jabodetabek","req":"8 Jan 26 00:00","checkin":"08 Jan 26 04:06","ota":false,"day":8},{"noSI":"260108HS004","vendor":"DMM","tujuan":"Bekasi","area":"Jabodetabek","req":"8 Jan 26 00:00","checkin":"08 Jan 26 06:29","ota":false,"day":8},{"noSI":"260108HS005","vendor":"DMM","tujuan":"Bekasi","area":"Jabodetabek","req":"8 Jan 26 00:00","checkin":"08 Jan 26 14:11","ota":false,"day":8},{"noSI":"260108HS006","vendor":"JPT","tujuan":"Sidoarjo","area":"Jawa Timur","req":"8 Jan 26 00:00","checkin":"08 Jan 26 06:28","ota":false,"day":8},{"noSI":"260108HS007","vendor":"JPT","tujuan":"Sidoarjo","area":"Jawa Timur","req":"8 Jan 26 00:00","checkin":"08 Jan 26 06:25","ota":false,"day":8}]}};
+
+// ── CSV PARSER ──────────────────────────────────────────────────────────────
+function parseLine(line) {
+  const res = []; let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') { if (inQ && line[i+1]==='"') { cur+='"'; i++; } else inQ=!inQ; }
+    else if (c === ',' && !inQ) { res.push(cur); cur=''; }
+    else cur += c;
+  }
+  res.push(cur);
+  return res;
+}
+
+function parseCSV(text) {
+  const lines = text.split(/\r?\n/);
+  if (!lines.length) return [];
+  const hdrs = parseLine(lines[0]).map(h => h.trim());
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const vals = parseLine(lines[i]);
+    const obj = {};
+    hdrs.forEach((h, j) => obj[h] = (vals[j]||'').trim());
+    obj['__colD__'] = (vals[3] ||'').trim(); // raw column D (Type Armada)
+    obj['__colO__'] = (vals[14]||'').trim(); // raw column O (Sidoarjo HCI/AHI classifier)
+    rows.push(obj);
+  }
+  return rows;
+}
+
+// ── DATE PARSER ─────────────────────────────────────────────────────────────
+const MON = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+function parseDT(s) {
+  if (!s) return null;
+  const m = s.trim().match(/^(\d{1,2})\s+(\w{3})\s+(\d{2,4})\s+(\d{2}):(\d{2})$/);
+  if (!m) return null;
+  let yr = parseInt(m[3]); if (yr < 100) yr += 2000;
+  const mo = MON[m[2].toLowerCase()];
+  if (mo === undefined) return null;
+  return new Date(yr, mo, parseInt(m[1]), parseInt(m[4]), parseInt(m[5]));
+}
+
+// ── BUILD D FROM CSV ROWS ───────────────────────────────────────────────────
+function buildD(rows) {
+  const MON_ORDER = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const sites=new Set(), months=new Set(), modas=new Set(), batches=new Set(), bus=new Set();
+  const summary={}, daily={}, vendor={}, detail={};
+  let skipped = 0;
+
+  rows.forEach(row => {
+    const site   = row['Supply site']  || '';
+    const noSI   = row['No SI']        || '';
+    const vdr    = row['Vendor']        || '';
+    const tujuan = row['Tujuan']        || '';
+    const area   = row['Area']          || '';
+    const moda   = row['Moda']          || '';
+    const reqStr = row['Req Stuffing']  || '';
+    const batch  = row['Batch']         || '';
+    const cinStr = row['Checkin']       || '';
+    const coutStr= row['Checkout']      || '';
+    const month  = row['Month']         || '';
+    const bu     = row['BU']            || '';
+
+    if (!site || !month || !moda || !batch || !reqStr || !cinStr) { skipped++; return; }
+    const reqDT  = parseDT(reqStr);
+    const cinDT  = parseDT(cinStr);
+    if (!reqDT || !cinDT) { skipped++; return; }
+
+    const ota = cinDT <= reqDT;
+    const day = reqDT.getDate();
+    sites.add(site); months.add(month); modas.add(moda); batches.add(batch); bus.add(bu);
+
+    const sk = site+'|'+month+'|'+moda+'|'+batch+'|'+bu;
+    const dk = sk+'|'+day;
+    const vk = sk+'|'+vdr;
+
+    if (!summary[sk]) summary[sk]={total:0,ot:0,late:0};
+    summary[sk].total++; if(ota) summary[sk].ot++; else summary[sk].late++;
+
+    if (!daily[dk]) daily[dk]={ot:0,late:0};
+    if(ota) daily[dk].ot++; else daily[dk].late++;
+
+    if (!vendor[vk]) vendor[vk]={total:0,ot:0,late:0};
+    vendor[vk].total++; if(ota) vendor[vk].ot++; else vendor[vk].late++;
+
+    if (!detail[sk]) detail[sk]=[];
+    detail[sk].push({noSI,vendor:vdr,tujuan,area,armada:normalizeArmada(row['__colD__']||''),req:reqStr,checkin:cinStr,ota,day});
+  });
+
+  const sortedSites   = [...sites].sort();
+  const sortedMonths  = [...months].sort((a,b)=>MON_ORDER.indexOf(a)-MON_ORDER.indexOf(b));
+  const sortedModas   = [...modas].sort();
+  const sortedBatches = [...batches].sort();
+  const sortedBus     = [...bus].sort();
+  console.log('OTA build done. Rows:', rows.length, 'Skipped:', skipped, 'Summary keys:', Object.keys(summary).length);
+  return {sites:sortedSites,months:sortedMonths,modas:sortedModas,batches:sortedBatches,bus:sortedBus,summary,daily,vendor,detail};
+}
+
+// ── FETCH & INIT ────────────────────────────────────────────────────────────
+async function fetchAndProcess() {
+  const overlay = document.getElementById('loadingOverlay');
+  const status  = document.getElementById('loadingStatus');
+  overlay.classList.remove('hidden');
+  try {
+    status.textContent = 'Mengambil data dari Google Sheets…';
+    const resp = await fetch(CSV_URL);
+    if (!resp.ok) throw new Error('Server error ' + resp.status);
+    status.textContent = 'Memproses ' + resp.headers.get('content-length') + ' bytes…';
+    const text = await resp.text();
+    status.textContent = 'Menghitung OTA…';
+    const rows = parseCSV(text);
+    if (rows.length === 0) throw new Error('Data kosong — pastikan Sheets sudah di-publish');
+    D  = buildD(rows);
+    LP = buildLP(rows);
+    FR = buildFR(rows);
+    // Update header
+    const tot = Object.values(D.summary).reduce((s,v)=>s+v.total,0);
+    document.getElementById('headerSub').textContent =
+      'Monitoring ketepatan waktu kedatangan armada · '+D.sites.length+' Site · '+D.months.length+' Bulan · '+tot.toLocaleString('id-ID')+' Trips';
+    document.getElementById('footerTotal').textContent = tot.toLocaleString('id-ID');
+    const frTot = Object.values(FR.summary).reduce((s,v)=>s+v.total,0);
+    document.getElementById('frFooterTotal').textContent = frTot.toLocaleString('id-ID');
+    // Hide overlay
+    overlay.classList.add('hidden');
+    setTimeout(()=>{ overlay.style.display='none'; }, 350);
+    // Init OTA filters
+    populateStatic();
+    const f0 = getF();
+    populateVendors(f0);
+    populateDays(f0);
+    applyFilters();
+    // Init LP filters
+    initLP();
+    // Init FR filters
+    initFR();
+  } catch(e) {
+    overlay.innerHTML = `<div class="error-box">
+      <div style="font-size:1.8rem;margin-bottom:10px">⚠️</div>
+      <div style="font-weight:700;font-size:.9rem;color:#fff;margin-bottom:6px">Gagal memuat data</div>
+      <div style="font-size:.75rem;margin-bottom:14px">${e.message}</div>
+      <div style="font-size:.68rem;color:#64748b;margin-bottom:14px">Pastikan Google Sheets sudah di-publish ke web sebagai CSV</div>
+      <button onclick="location.reload()" style="background:#3b82f6;color:#fff;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-size:.8rem;font-weight:600;">↺ Coba Lagi</button>
+    </div>`;
+  }
+}
+
+function reloadData() {
+  const overlay = document.getElementById('loadingOverlay');
+  overlay.style.display = 'flex';
+  overlay.classList.remove('hidden');
+  overlay.innerHTML = `<div class="loading-spinner"></div>
+    <div class="loading-text">Refresh data…</div>
+    <div class="loading-sub" id="loadingStatus">Menghubungkan ke Google Sheets</div>`;
+  // Reset OTA + LP + FR filter dropdowns
+  const msMap = {
+    msSite:'Semua Site',msMonth:'Semua Bulan',msModa:'Semua Moda',
+    msBatch:'Semua Batch',msBU:'Semua BU',msVendor:'Semua Vendor',msDate:'Semua Tgl',
+    lpMsSite:'Semua Site',lpMsMonth:'Semua Bulan',lpMsArmada:'Semua Armada',lpMsBU:'Semua BU',
+    lpMsVendor:'Semua Vendor',lpMsDate:'Semua Tgl',
+    frMsSite:'Semua Site',frMsMonth:'Semua Bulan',frMsModa:'Semua Moda',
+    frMsBatch:'Semua Batch',frMsDC:'Semua DC',frMsBU:'Semua BU',frMsVendor:'Semua Vendor',frMsDate:'Semua Tgl'
+  };
+  Object.entries(msMap).forEach(([id,lbl])=>{
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.querySelectorAll('input').forEach(cb=>{cb.checked=false;cb.indeterminate=false;});
+    el.classList.remove('ms-active');
+    const lblEl = el.querySelector('.ms-label');
+    if (lblEl) lblEl.textContent = lbl;
+    el.querySelector('.ms-body').innerHTML = '';
+  });
+  LP = {sites:[],months:[],armadas:[],vendors:[],summary:{},daily:{},vendor:{},detail:{}};
+  FR = {sites:[],months:[],modas:[],batches:[],dcs:[],summary:{},daily:{},detail:{}};
+  fetchAndProcess();
+}
+
+// ── HELPERS ─────────────────────────────────────────────────────────────────
+// matchVal: supports 'ALL' (no filter), string[], or single string
+function matchVal(val, filter) {
+  if (filter === 'ALL') return true;
+  if (Array.isArray(filter)) return filter.includes(val);
+  return val === filter;
+}
+
+function getF() {
+  return {
+    site:   getMS('msSite'),
+    month:  getMS('msMonth'),
+    moda:   getMS('msModa'),
+    batch:  getMS('msBatch'),
+    bu:     getMS('msBU'),
+    vendor: getMS('msVendor'),
+    date:   getMS('msDate'),
+  };
+}
+
+function matchKey(k, f) {
+  const p = k.split('|');
+  return matchVal(p[0], f.site)
+      && matchVal(p[1], f.month)
+      && matchVal(p[2], f.moda)
+      && matchVal(p[3], f.batch)
+      && matchVal(p[4], f.bu);
+}
+
+function matchVKey(k, f) {
+  const p = k.split('|');
+  return matchVal(p[0], f.site)
+      && matchVal(p[1], f.month)
+      && matchVal(p[2], f.moda)
+      && matchVal(p[3], f.batch)
+      && matchVal(p[4], f.bu)
+      && matchVal(p[5], f.vendor);
+}
+
+function matchDayKey(k, f) {
+  const p = k.split('|');
+  return matchVal(p[0], f.site)
+      && matchVal(p[1], f.month)
+      && matchVal(p[2], f.moda)
+      && matchVal(p[3], f.batch)
+      && matchVal(p[4], f.bu)
+      && matchVal(String(p[5]), f.date);
+}
+
+// ── POPULATE FILTERS ─────────────────────────────────────────────────────────
+function populateStatic() {
+  buildMS('msSite',   D.sites,    'Site');
+  buildMS('msMonth',  D.months,   'Bulan');
+  buildMS('msModa',   D.modas,    'Moda');
+  buildMS('msBatch',  D.batches,  'Batch');
+  buildMS('msBU',     D.bus,      'BU');
+}
+
+function populateVendors(f) {
+  const cur = getMS('msVendor');
+  const seen = new Set();
+  Object.keys(D.vendor).forEach(k=>{ if(matchKey(k,f)) seen.add(k.split('|')[5]); });
+  const opts = [...seen].sort();
+  buildMS('msVendor', opts, 'Vendor');
+  // Restore previous selection where still valid
+  if (cur !== 'ALL') {
+    const valid = cur.filter(v => opts.includes(v));
+    if (valid.length > 0) {
+      const el = document.getElementById('msVendor');
+      el.querySelectorAll('input.ms-cb').forEach(cb => { cb.checked = valid.includes(cb.value); });
+      setMSLabel('msVendor', 'Vendor');
+    }
+  }
+}
+
+function populateDays(f) {
+  const cur = getMS('msDate');
+  const seen = new Set();
+  Object.keys(D.daily).forEach(k=>{ if(matchKey(k,f)) seen.add(parseInt(k.split('|')[5])); });
+  const opts = [...seen].sort((a,b)=>a-b);
+  buildMS('msDate', opts.map(String), 'Tgl');
+  // Override labels to show "Tgl N"
+  const el = document.getElementById('msDate');
+  el.querySelectorAll('input.ms-cb').forEach((cb, i) => {
+    const lbl = cb.closest('label');
+    if (lbl) lbl.lastChild.textContent = ' Tgl ' + opts[i];
+  });
+  // Restore previous selection
+  if (cur !== 'ALL') {
+    const valid = cur.filter(v => opts.map(String).includes(v));
+    if (valid.length > 0) {
+      el.querySelectorAll('input.ms-cb').forEach(cb => { cb.checked = valid.includes(cb.value); });
+      setMSLabel('msDate', 'Tgl');
+    }
+  }
+}
+
+function onFilterChange() {
+  const f=getF(); populateVendors(f); populateDays(f); applyFilters();
+}
+
+function resetFilters() {
+  ['msSite','msMonth','msModa','msBatch','msBU','msVendor','msDate'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.querySelectorAll('input').forEach(cb => { cb.checked=false; cb.indeterminate=false; });
+    el.classList.remove('ms-active');
+    const lbl = el.querySelector('.ms-label');
+    if (lbl) {
+      const map = {msSite:'Semua Site',msMonth:'Semua Bulan',msModa:'Semua Moda',
+                   msBatch:'Semua Batch',msBU:'Semua BU',msVendor:'Semua Vendor',msDate:'Semua Tgl'};
+      lbl.textContent = map[id] || 'Semua';
+    }
+  });
+  applyFilters();
+}
+
+// ── COMPUTE STATS ────────────────────────────────────────────────────────────
+function getStats(f) {
+  let total=0,ot=0,late=0;
+  if (f.date!=='ALL') {
+    // date filter active — use daily + detail
+    Object.entries(D.daily).forEach(([k,v])=>{
+      if(matchDayKey(k,f)&&f.vendor==='ALL'){total+=v.ot+v.late;ot+=v.ot;late+=v.late;}
+    });
+    if(f.vendor!=='ALL'){
+      Object.entries(D.detail).forEach(([k,arr])=>{
+        if(matchKey(k,f)) arr.forEach(r=>{
+          if(matchVal(r.vendor,f.vendor)&&matchVal(String(r.day),f.date)){total++;if(r.ota)ot++;else late++;}
+        });
+      });
+    }
+  } else {
+    // no date filter
+    Object.entries(D.summary).forEach(([k,v])=>{
+      if(matchKey(k,f)&&f.vendor==='ALL'){total+=v.total;ot+=v.ot;late+=v.late;}
+    });
+    if(f.vendor!=='ALL'){
+      Object.entries(D.vendor).forEach(([k,v])=>{
+        if(matchVKey(k,f)){total+=v.total;ot+=v.ot;late+=v.late;}
+      });
+    }
+  }
+  return {total,ot,late};
+}
+
+function getDayStats(f) {
+  const map={};
+  if (f.vendor !== 'ALL') {
+    // vendor filter active: D.daily has no vendor dimension, must use detail
+    Object.entries(D.detail).forEach(([k,arr])=>{
+      if(matchKey(k,f)) arr.forEach(r=>{
+        if(matchVal(r.vendor,f.vendor) && matchVal(String(r.day),f.date)){
+          if(!map[r.day]) map[r.day]={ot:0,late:0};
+          if(r.ota) map[r.day].ot++; else map[r.day].late++;
+        }
+      });
+    });
+  } else {
+    Object.entries(D.daily).forEach(([k,v])=>{
+      const p=k.split('|');
+      if(matchKey(k,f)&&matchVal(String(p[5]),f.date)){
+        const day=parseInt(p[5]);
+        if(!map[day]) map[day]={ot:0,late:0};
+        map[day].ot+=v.ot; map[day].late+=v.late;
+      }
+    });
+  }
+  return map;
+}
+
+function getVendorStats(f) {
+  const vm={};
+  if(f.date!=='ALL'){
+    // date filter active: use detail data, apply vendor filter too
+    Object.entries(D.detail).forEach(([k,arr])=>{
+      if(matchKey(k,f)) arr.forEach(r=>{
+        if(matchVal(String(r.day),f.date) && matchVal(r.vendor,f.vendor)){
+          if(!vm[r.vendor]) vm[r.vendor]={ot:0,late:0};
+          if(r.ota) vm[r.vendor].ot++; else vm[r.vendor].late++;
+        }
+      });
+    });
+  } else {
+    // no date filter: use aggregated vendor data, apply vendor filter
+    Object.entries(D.vendor).forEach(([k,v])=>{
+      const ve=k.split('|')[5];
+      if(matchKey(k,f) && matchVal(ve,f.vendor)){
+        if(!vm[ve]) vm[ve]={ot:0,late:0};
+        vm[ve].ot+=v.ot; vm[ve].late+=v.late;
+      }
+    });
+  }
+  return vm;
+}
+
+function getDetailRows(f) {
+  const rows=[];
+  Object.entries(D.detail).forEach(([k,arr])=>{
+    if(matchKey(k,f)){
+      arr.forEach(r=>{
+        if(matchVal(r.vendor,f.vendor)&&matchVal(String(r.day),f.date))
+          rows.push(r);
+      });
+    }
+  });
+  rows.sort((a,b)=>{ if(!a.ota&&b.ota) return -1; if(a.ota&&!b.ota) return 1; return a.noSI.localeCompare(b.noSI); });
+  return rows.slice(0,100);
+}
+
+// ── BAR LABEL PLUGIN ─────────────────────────────────────────────────────────
+const barLabelPlugin = {
+  id: 'barLabels',
+  afterDatasetsDraw(chart) {
+    const { ctx, data } = chart;
+    data.datasets.forEach((ds, i) => {
+      chart.getDatasetMeta(i).data.forEach((bar, idx) => {
+        const val = ds.data[idx];
+        if (val === 0) return;
+        const col = val >= 80 ? '#4ade80' : val >= 60 ? '#fbbf24' : '#f87171';
+        ctx.save();
+        ctx.font = 'bold 8px Segoe UI, Arial, sans-serif';
+        ctx.fillStyle = col;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(val + '%', bar.x, bar.y - 2);
+        ctx.restore();
+      });
+    });
+  }
+};
+
+// ── CHARTS ───────────────────────────────────────────────────────────────────
+let cDay=null;
+
+function renderDayChart(dm) {
+  const days=Object.keys(dm).map(Number).sort((a,b)=>a-b);
+  const pcts=days.map(d=>{const t=dm[d].ot+dm[d].late;return t>0?Math.round(dm[d].ot/t*100):0;});
+  const ctx=document.getElementById('chartDaily').getContext('2d');
+  if(cDay) cDay.destroy();
+  cDay=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:days.map(d=>`${d}`),
+      datasets:[{label:'OTA %',data:pcts,
+        backgroundColor:pcts.map(p=>p>=80?'#22c55e55':p>=60?'#f59e0b55':'#ef444455'),
+        borderColor:pcts.map(p=>p>=80?'#22c55e':p>=60?'#f59e0b':'#ef4444'),
+        borderWidth:1.5,borderRadius:4}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      layout:{padding:{top:16}},
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{
+          title:c=>`Tgl ${c[0].label}`,
+          label:c=>{const d=days[c.dataIndex];const t=dm[d].ot+dm[d].late;return ` OTA: ${c.raw}% (${dm[d].ot} OT / ${t} total)`;}
+        }}
+      },
+      scales:{
+        x:{ticks:{color:'#64748b',font:{size:9}},grid:{color:'#1e293b'}},
+        y:{min:0,max:100,ticks:{color:'#64748b',callback:v=>v+'%',font:{size:9}},grid:{color:'#1e293b66'}}
+      }
+    },
+    plugins:[barLabelPlugin]
+  });
+}
+
+// ── TABLES ───────────────────────────────────────────────────────────────────
+function renderVendorTable(vm) {
+  const sortVal=(document.getElementById('vendorSort')||{value:'total_desc'}).value;
+  const sorters={
+    total_desc:(a,b)=>b.total-a.total,
+    ota_desc:(a,b)=>b.pct-a.pct||b.total-a.total,
+    ota_asc:(a,b)=>a.pct-b.pct||b.total-a.total,
+    name_asc:(a,b)=>a.v.localeCompare(b.v),
+  };
+  const entries=Object.entries(vm)
+    .map(([v,s])=>({v,total:s.ot+s.late,ot:s.ot,late:s.late,pct:s.ot+s.late>0?Math.round(s.ot/(s.ot+s.late)*100):0}))
+    .sort(sorters[sortVal]||sorters.total_desc);
+  document.getElementById('vendorTableBody').innerHTML=entries.map(e=>{
+    const cls=e.pct>=80?'good':e.pct>=60?'mid':'bad';
+    const col=e.pct>=80?'#22c55e':e.pct>=60?'#fbbf24':'#ef4444';
+    const isActive = e.v === _selectedVendor;
+    const safeV = e.v.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return `<tr style="cursor:pointer;${isActive?'background:#1a2e4a;outline:1px solid #3b82f6;':''}transition:background .12s;" onclick="showVendorPerforma('${safeV}',this)">
+      <td><strong>${e.v}</strong></td>
+      <td>${e.total.toLocaleString()}</td>
+      <td class="good">${e.ot.toLocaleString()}</td>
+      <td class="bad">${e.late.toLocaleString()}</td>
+      <td><div class="ota-bar-wrap"><div class="ota-bar-bg"><div class="ota-bar-fill" style="width:${e.pct}%;background:${col}"></div></div><span class="ota-pct ${cls}">${e.pct}%</span></div></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── VENDOR PERFORMA DETAIL ────────────────────────────────────────────────────
+let _selectedVendor = null;
+
+function showVendorPerforma(vdr, trEl) {
+  if (_selectedVendor === vdr) {
+    _selectedVendor = null;
+    applyFilters();
+    return;
+  }
+  _selectedVendor = vdr;
+  applyFilters();
+}
+
+function renderVendorDetail() {
+  const empty = document.getElementById('vendorDetailEmpty');
+  const wrap  = document.getElementById('vendorDetailTableWrap');
+  const sub   = document.getElementById('vendorDetailSubtitle');
+  if (!_selectedVendor) {
+    if (empty) empty.style.display = 'block';
+    if (wrap)  wrap.style.display  = 'none';
+    if (sub)   sub.textContent     = 'Klik vendor untuk melihat detail rute & armada';
+    return;
+  }
+  const f = getF();
+  // aggregate by tujuan → armada
+  const sm = {};
+  Object.entries(D.detail).forEach(([k, arr]) => {
+    if (matchKey(k, f)) {
+      arr.forEach(r => {
+        if (r.vendor === _selectedVendor && matchVal(String(r.day), f.date)) {
+          const tuj = r.tujuan;
+          const arm = r.armada || '—';
+          if (!sm[tuj]) sm[tuj] = {area: r.area, ot: 0, late: 0, armadas: {}};
+          if (r.ota) sm[tuj].ot++; else sm[tuj].late++;
+          if (!sm[tuj].armadas[arm]) sm[tuj].armadas[arm] = {ot: 0, late: 0};
+          if (r.ota) sm[tuj].armadas[arm].ot++; else sm[tuj].armadas[arm].late++;
+        }
+      });
+    }
+  });
+  const sortVal = (document.getElementById('vendorDetailSort')||{value:'total_desc'}).value;
+  const sorters = {
+    total_desc: (a, b) => b.tot - a.tot,
+    ota_desc:   (a, b) => b.pct - a.pct || b.tot - a.tot,
+    ota_asc:    (a, b) => a.pct - b.pct || b.tot - a.tot,
+  };
+  const tujuanEntries = Object.entries(sm)
+    .map(([tujuan, s]) => {
+      const tot = s.ot + s.late;
+      const pct = tot > 0 ? Math.round(s.ot / tot * 100) : 0;
+      const armadaList = Object.entries(s.armadas)
+        .map(([arm, d]) => { const at = d.ot + d.late; const ap = at > 0 ? Math.round(d.ot / at * 100) : 0; return {arm, ot: d.ot, late: d.late, tot: at, pct: ap}; })
+        .sort((a, b) => b.tot - a.tot);
+      return {tujuan, area: s.area, tot, ot: s.ot, late: s.late, pct, armadaList};
+    })
+    .sort(sorters[sortVal] || sorters.total_desc);
+  if (sub) sub.textContent = _selectedVendor + ' · ' + tujuanEntries.length + ' tujuan';
+  if (empty) empty.style.display = 'none';
+  if (wrap)  wrap.style.display  = '';
+  document.getElementById('detailTableBody').innerHTML = tujuanEntries.length === 0
+    ? '<tr><td colspan="5" style="text-align:center;color:#475569;padding:16px;font-size:.75rem;">Tidak ada data untuk vendor ini pada filter aktif</td></tr>'
+    : tujuanEntries.map(tuj => {
+        const cls = tuj.pct >= 80 ? 'good' : tuj.pct >= 60 ? 'mid' : 'bad';
+        const col = tuj.pct >= 80 ? '#22c55e' : tuj.pct >= 60 ? '#fbbf24' : '#ef4444';
+        const tujRow = `<tr style="background:#131f2e;border-top:2px solid #1e3a5f;">
+          <td style="padding:7px 8px;">
+            <div style="font-weight:700;font-size:.8rem;color:#e2e8f0;">${tuj.tujuan}</div>
+            <div style="font-size:.62rem;color:#64748b;margin-top:1px;">${tuj.area}</div>
+          </td>
+          <td style="font-weight:600;">${tuj.tot.toLocaleString()}</td>
+          <td class="good" style="font-weight:600;">${tuj.ot.toLocaleString()}</td>
+          <td class="bad" style="font-weight:600;">${tuj.late.toLocaleString()}</td>
+          <td><div class="ota-bar-wrap"><div class="ota-bar-bg"><div class="ota-bar-fill" style="width:${tuj.pct}%;background:${col}"></div></div><span class="ota-pct ${cls}">${tuj.pct}%</span></div></td>
+        </tr>`;
+        const armRows = tuj.armadaList.map(a => {
+          const ac = a.pct >= 80 ? 'good' : a.pct >= 60 ? 'mid' : 'bad';
+          const ag = a.pct >= 80 ? '#22c55e' : a.pct >= 60 ? '#fbbf24' : '#ef4444';
+          return `<tr style="background:#0d1724;border-top:1px solid #0f172a;">
+            <td style="padding:5px 8px 5px 22px;">
+              <span style="color:#334155;margin-right:5px;font-size:.65rem;">↳</span>
+              <span style="font-size:.7rem;font-weight:600;padding:1px 7px;border-radius:4px;background:#1e293b;color:#94a3b8;">${a.arm}</span>
+            </td>
+            <td style="font-size:.78rem;">${a.tot.toLocaleString()}</td>
+            <td class="good" style="font-size:.78rem;">${a.ot.toLocaleString()}</td>
+            <td class="bad" style="font-size:.78rem;">${a.late.toLocaleString()}</td>
+            <td><div class="ota-bar-wrap"><div class="ota-bar-bg"><div class="ota-bar-fill" style="width:${a.pct}%;background:${ag}"></div></div><span class="ota-pct ${ac}" style="font-size:.65rem;">${a.pct}%</span></div></td>
+          </tr>`;
+        }).join('');
+        return tujRow + armRows;
+      }).join('');
+}
+
+// ── ROUTE OTA PER TUJUAN ──────────────────────────────────────────────────────
+let _routeSM = {};
+
+function getRouteStats(f) {
+  const sm = {};
+  Object.entries(D.detail).forEach(([k, arr]) => {
+    if (matchKey(k, f)) {
+      arr.forEach(r => {
+        if (matchVal(r.vendor, f.vendor) && matchVal(String(r.day), f.date)) {
+          const tuj = r.tujuan;
+          if (!sm[tuj]) sm[tuj] = {area: r.area, ot: 0, late: 0, breakdown: {}};
+          if (r.ota) sm[tuj].ot++; else sm[tuj].late++;
+          const arm = r.armada || '—';
+          const vdr = r.vendor || '—';
+          const bk = arm + '|' + vdr;
+          if (!sm[tuj].breakdown[bk]) sm[tuj].breakdown[bk] = {armada: arm, vendor: vdr, ot: 0, late: 0};
+          if (r.ota) sm[tuj].breakdown[bk].ot++; else sm[tuj].breakdown[bk].late++;
+        }
+      });
+    }
+  });
+  return sm;
+}
+
+function toggleRouteDetail(keyStr, trEl) {
+  const next = trEl.nextElementSibling;
+  if (next && next.classList.contains('route-detail-row')) {
+    next.remove();
+    const btn = trEl.querySelector('.route-expand-btn');
+    if (btn) btn.textContent = '▶';
+    return;
+  }
+  const s = _routeSM[keyStr];
+  if (!s) return;
+  const bkEntries = Object.values(s.breakdown)
+    .map(b => { const tot = b.ot + b.late; const pct = tot > 0 ? Math.round(b.ot / tot * 100) : 0; return {...b, tot, pct}; })
+    .sort((a, b) => a.armada.localeCompare(b.armada) || b.tot - a.tot);
+  let prevArm = null;
+  const bkRows = bkEntries.map(b => {
+    const cls = b.pct >= 80 ? 'good' : b.pct >= 60 ? 'mid' : 'bad';
+    const col = b.pct >= 80 ? '#22c55e' : b.pct >= 60 ? '#fbbf24' : '#ef4444';
+    let armCell = '';
+    if (b.armada !== prevArm) {
+      armCell = `<span style="font-size:.65rem;font-weight:700;padding:1px 5px;border-radius:3px;background:#1e293b;color:#94a3b8;">${b.armada}</span>`;
+      prevArm = b.armada;
+    }
+    return `<tr style="border-bottom:1px solid #0f172a;">
+      <td style="padding:5px 6px 5px 0;font-size:.72rem;white-space:nowrap;">${armCell}</td>
+      <td style="padding:5px 0;font-size:.72rem;color:#cbd5e1;">${b.vendor}</td>
+      <td style="padding:5px 8px;font-size:.72rem;text-align:right;">${b.tot.toLocaleString()}</td>
+      <td style="padding:5px 8px;font-size:.72rem;text-align:right;color:#4ade80;">${b.ot.toLocaleString()}</td>
+      <td style="padding:5px 8px;font-size:.72rem;text-align:right;color:#f87171;">${b.late.toLocaleString()}</td>
+      <td style="padding:5px 0 5px 8px;min-width:110px;"><div class="ota-bar-wrap"><div class="ota-bar-bg"><div class="ota-bar-fill" style="width:${b.pct}%;background:${col}"></div></div><span class="ota-pct ${cls}" style="font-size:.65rem;">${b.pct}%</span></div></td>
+    </tr>`;
+  }).join('');
+  const detailTr = document.createElement('tr');
+  detailTr.className = 'route-detail-row';
+  detailTr.innerHTML = `<td colspan="7" style="padding:0;background:#080f1a;border-top:none;border-bottom:2px solid #334155;">
+    <div style="padding:10px 16px 14px 36px;">
+      <div style="font-size:.6rem;font-weight:700;color:#475569;letter-spacing:.08em;margin-bottom:8px;text-transform:uppercase;">Breakdown — ${keyStr}</div>
+      <table style="width:100%;border-collapse:collapse;">
+        <thead><tr style="border-bottom:1px solid #1e293b;">
+          <th style="text-align:left;font-size:.62rem;color:#475569;font-weight:600;padding:3px 6px 3px 0;">Armada</th>
+          <th style="text-align:left;font-size:.62rem;color:#475569;font-weight:600;padding:3px 0;">Vendor</th>
+          <th style="font-size:.62rem;color:#475569;font-weight:600;padding:3px 8px;text-align:right;">Total</th>
+          <th style="font-size:.62rem;color:#22c55e;font-weight:600;padding:3px 8px;text-align:right;">OT</th>
+          <th style="font-size:.62rem;color:#ef4444;font-weight:600;padding:3px 8px;text-align:right;">Late</th>
+          <th style="font-size:.62rem;color:#475569;font-weight:600;padding:3px 0 3px 8px;">OTA %</th>
+        </tr></thead>
+        <tbody>${bkRows}</tbody>
+      </table>
+    </div>
+  </td>`;
+  trEl.after(detailTr);
+  const btn = trEl.querySelector('.route-expand-btn');
+  if (btn) btn.textContent = '▼';
+}
+
+function renderRouteTujuan(sm) {
+  _routeSM = sm;
+  const q = (document.getElementById('routeSearch')||{value:''}).value.trim().toLowerCase();
+  const sortVal = (document.getElementById('routeSort')||{value:'total_desc'}).value;
+  const sorters = {
+    total_desc: (a,b) => b.total - a.total,
+    rate_desc:  (a,b) => b.pct - a.pct || b.total - a.total,
+    rate_asc:   (a,b) => a.pct - b.pct || b.total - a.total,
+    name_asc:   (a,b) => a.tujuan.localeCompare(b.tujuan),
+  };
+  let entries = Object.entries(sm)
+    .map(([tujuan, s]) => {
+      const total = s.ot + s.late;
+      const pct = total > 0 ? Math.round(s.ot / total * 100) : 0;
+      return {tujuan, area: s.area, total, ot: s.ot, late: s.late, pct};
+    })
+    .sort(sorters[sortVal] || sorters.total_desc);
+  if (q) entries = entries.filter(e =>
+    e.tujuan.toLowerCase().includes(q) ||
+    e.area.toLowerCase().includes(q)
+  );
+  const empty = document.getElementById('routeSearchEmpty');
+  if (entries.length === 0) {
+    document.getElementById('routeTujuanTableBody').innerHTML = '';
+    if (empty) empty.style.display = 'block'; return;
+  }
+  if (empty) empty.style.display = 'none';
+  document.getElementById('routeTujuanTableBody').innerHTML = entries.map((e, i) => {
+    const cls = e.pct >= 80 ? 'good' : e.pct >= 60 ? 'mid' : 'bad';
+    const col = e.pct >= 80 ? '#22c55e' : e.pct >= 60 ? '#fbbf24' : '#ef4444';
+    const safeKey = e.tujuan.replace(/'/g, "\\'");
+    return `<tr style="cursor:pointer;" onclick="toggleRouteDetail('${safeKey}', this)" title="Klik untuk lihat detail armada & vendor">
+      <td style="color:#475569;font-size:.65rem;white-space:nowrap;"><span class="route-expand-btn" style="display:inline-block;width:12px;margin-right:4px;font-size:.6rem;color:#475569;">▶</span>${i+1}</td>
+      <td><strong>${e.tujuan}</strong></td>
+      <td style="color:#94a3b8">${e.area}</td>
+      <td>${e.total.toLocaleString()}</td>
+      <td class="good">${e.ot.toLocaleString()}</td>
+      <td class="bad">${e.late.toLocaleString()}</td>
+      <td><div class="ota-bar-wrap"><div class="ota-bar-bg"><div class="ota-bar-fill" style="width:${e.pct}%;background:${col}"></div></div><span class="ota-pct ${cls}">${e.pct}%</span></div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderDetail(rows) {
+  document.getElementById('detailTableBody').innerHTML=rows.map(r=>{
+    const minDiff = calcDelayMin(r);
+    const delayTxt = formatDelay(minDiff);
+    let delayCell;
+    if (r.ota) {
+      delayCell = `<td style="font-size:.68rem;color:#4ade80;font-weight:600;">${delayTxt}</td>`;
+    } else {
+      const cat = (minDiff !== null && minDiff > 0) ? delayCategory(minDiff) : '';
+      const catIdx = DELAY_CATS.indexOf(cat);
+      const catCol = catIdx >= 0 ? DELAY_COLORS[catIdx] : '#f87171';
+      delayCell = `<td style="font-size:.68rem;font-weight:600;">
+        <span style="color:${catCol}">${delayTxt}</span>
+        ${cat ? `<span style="font-size:.56rem;color:#64748b;margin-left:3px;">${cat}</span>` : ''}
+      </td>`;
+    }
+    return `<tr>
+      <td style="font-size:.62rem;color:#94a3b8">${r.noSI}</td>
+      <td>${r.vendor}</td>
+      <td style="font-size:.66rem">${r.area}</td>
+      <td><span class="status-badge ${r.ota?'ot':'late'}">${r.ota?'ON TIME':'LATE'}</span></td>
+      ${delayCell}
+    </tr>`;
+  }).join('');
+}
+
+// ── SITE SUMMARY ─────────────────────────────────────────────────────────────
+function renderSiteSummary(f) {
+  const sec=document.getElementById('siteSummarySection');
+  const showingSingleSite = f.site !== 'ALL' && (!Array.isArray(f.site) || f.site.length === 1);
+  if(showingSingleSite){sec.style.display='none';return;}
+  sec.style.display='block';
+  const sm={};
+  D.sites.forEach(s=>sm[s]={ot:0,late:0});
+  if(f.date!=='ALL'){
+    Object.entries(D.daily).forEach(([k,v])=>{
+      const s=k.split('|')[0];
+      const ff={...f,site:'ALL'};
+      if(matchDayKey(k,ff)&&sm[s]){sm[s].ot+=v.ot;sm[s].late+=v.late;}
+    });
+  } else {
+    Object.entries(D.summary).forEach(([k,v])=>{
+      const s=k.split('|')[0];
+      const ff={...f,site:'ALL'};
+      if(matchKey(k,ff)&&sm[s]){sm[s].ot+=v.ot;sm[s].late+=v.late;}
+    });
+  }
+  document.getElementById('siteSummaryGrid').innerHTML=D.sites.map(s=>{
+    const st=sm[s]; const total=st.ot+st.late;
+    const pct=total>0?Math.round(st.ot/total*100):0;
+    const col=pct>=80?'#4ade80':pct>=60?'#fbbf24':'#f87171';
+    const bg=pct>=80?'#14532d':pct>=60?'#451a03':'#450a0a';
+    return `<div class="site-card">
+      <div class="site-card-name">📍 ${s}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">
+        <span class="site-ota-pct" style="color:${col}">${pct}%</span>
+        <span style="font-size:.66rem;background:${bg};color:${col};padding:2px 7px;border-radius:8px;">OTA Rate</span>
+      </div>
+      <div class="ota-bar-bg" style="margin-bottom:7px;height:7px;">
+        <div class="ota-bar-fill" style="width:${pct}%;background:${col};height:7px;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:.66rem;color:#94a3b8;">
+        <span>✅ ${st.ot.toLocaleString()}</span>
+        <span>⚠️ ${st.late.toLocaleString()}</span>
+        <span>📦 ${total.toLocaleString()}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function fmtFilter(v, prefix) {
+  if (v === 'ALL') return null;
+  const arr = Array.isArray(v) ? v : [v];
+  return (prefix ? arr.map(x=>prefix+x) : arr).join(', ');
+}
+
+function buildTag(f) {
+  const parts=[];
+  const s=fmtFilter(f.site); if(s) parts.push(s);
+  const m=fmtFilter(f.month); if(m) parts.push(m);
+  const mo=fmtFilter(f.moda); if(mo) parts.push(mo);
+  const b=fmtFilter(f.batch); if(b) parts.push(b);
+  const v=fmtFilter(f.vendor); if(v) parts.push(v);
+  const d=fmtFilter(f.date,'Tgl '); if(d) parts.push(d);
+  return parts.length?parts.join(' · '):'All Filter';
+}
+
+// ── APPLY ────────────────────────────────────────────────────────────────────
+function applyFilters() {
+  const f=getF();
+  const {total,ot,late}=getStats(f);
+  const rate=total>0?Math.round(ot/total*100):0;
+  document.getElementById('kpiTotal').textContent=total.toLocaleString();
+  document.getElementById('kpiOT').textContent=ot.toLocaleString();
+  document.getElementById('kpiLate').textContent=late.toLocaleString();
+  document.getElementById('kpiRate').textContent=rate+'%';
+  document.getElementById('kpiRateSub').textContent=rate>=80?'✅ Target Tercapai':rate>=60?'⚠️ Perlu Perhatian':'🔴 Di Bawah Target';
+  document.getElementById('filterCount').textContent=total.toLocaleString();
+  document.getElementById('grandTotal').textContent=total.toLocaleString();
+  document.getElementById('chartTag').textContent=buildTag(f);
+  renderDayChart(getDayStats(f));
+  renderBatchPerf(f);
+  renderDelayKpi(f);
+  renderVendorTable(getVendorStats(f));
+  renderVendorDetail();
+  renderSiteSummary(f);
+  renderRouteTujuan(getRouteStats(f));
+  document.getElementById('lastUpdated').textContent=new Date().toLocaleString('id-ID');
+}
+
+// ── MULTI-SELECT HELPERS ──────────────────────────────────────────────────────
+function getMS(id) {
+  const el = document.getElementById(id);
+  if (!el) return 'ALL';
+  const checked = [...el.querySelectorAll('input.ms-cb:checked')].map(i => i.value);
+  return checked.length === 0 ? 'ALL' : checked;
+}
+
+function setMSLabel(id, placeholder) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const cbs = [...el.querySelectorAll('input.ms-cb')];
+  const checked = cbs.filter(i => i.checked);
+  const label = el.querySelector('.ms-label');
+  const allCb = el.querySelector('input.ms-all');
+  if (checked.length === 0) {
+    if (label) label.textContent = 'Semua ' + placeholder;
+    el.classList.remove('ms-active');
+    if (allCb) { allCb.checked = false; allCb.indeterminate = false; }
+  } else if (checked.length === cbs.length) {
+    if (label) label.textContent = 'Semua ' + placeholder;
+    el.classList.remove('ms-active');
+    if (allCb) { allCb.checked = true; allCb.indeterminate = false; }
+  } else {
+    if (label) label.textContent = checked.length + ' terpilih';
+    el.classList.add('ms-active');
+    if (allCb) { allCb.checked = false; allCb.indeterminate = true; }
+  }
+}
+
+function buildMS(id, options, placeholder) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const body = el.querySelector('.ms-body');
+  body.innerHTML = options.length === 0
+    ? '<div class="ms-opt" style="color:#475569;font-style:italic;">Tidak ada opsi</div>'
+    : `<label class="ms-opt" style="color:#94a3b8;font-weight:600;">
+        <input type="checkbox" class="ms-all" onchange="onMSAllChange('${id}','${placeholder}')"> Semua ${placeholder}
+      </label>
+      <div class="ms-divider"></div>
+      ${options.map(o=>`<label class="ms-opt"><input type="checkbox" class="ms-cb" value="${o}" onchange="onMSCbChange('${id}','${placeholder}')">${o}</label>`).join('')}`;
+  setMSLabel(id, placeholder);
+}
+
+function onMSAllChange(id, placeholder) {
+  const el = document.getElementById(id);
+  const allCb = el.querySelector('input.ms-all');
+  el.querySelectorAll('input.ms-cb').forEach(cb => cb.checked = allCb.checked);
+  setMSLabel(id, placeholder);
+  if(id.startsWith('lp')) onLPFilterChange(); else if(id.startsWith('fr')) onFRFilterChange(); else onFilterChange();
+}
+
+function onMSCbChange(id, placeholder) {
+  const el = document.getElementById(id);
+  const cbs = [...el.querySelectorAll('input.ms-cb')];
+  const allCb = el.querySelector('input.ms-all');
+  const allChecked = cbs.every(cb => cb.checked);
+  const someChecked = cbs.some(cb => cb.checked);
+  if (allCb) { allCb.checked = allChecked; allCb.indeterminate = !allChecked && someChecked; }
+  setMSLabel(id, placeholder);
+  if(id.startsWith('lp')) onLPFilterChange(); else if(id.startsWith('fr')) onFRFilterChange(); else onFilterChange();
+}
+
+function toggleMS(id) {
+  const wrap = document.getElementById(id);
+  const body = wrap.querySelector('.ms-body');
+  const trigger = wrap.querySelector('.ms-trigger');
+  const isOpen = body.classList.contains('open');
+  document.querySelectorAll('.ms-body.open').forEach(b => {
+    b.classList.remove('open');
+    b.closest('.ms-wrap').querySelector('.ms-trigger').classList.remove('open');
+  });
+  if (!isOpen) { body.classList.add('open'); trigger.classList.add('open'); }
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.ms-wrap')) {
+    document.querySelectorAll('.ms-body.open').forEach(b => b.classList.remove('open'));
+    document.querySelectorAll('.ms-trigger.open').forEach(t => t.classList.remove('open'));
+  }
+});
+
+// ── DELAY HELPERS ────────────────────────────────────────────────────────────
+const DELAY_CATS   = ['<1 jam','1-3 jam','>3-6 jam','>6-12 jam','>12-24 jam','>24 jam'];
+const DELAY_COLORS = ['#fbbf24','#f97316','#ef4444','#dc2626','#b91c1c','#9f1239'];
+const DELAY_BORD   = ['#f59e0b','#ea580c','#dc2626','#b91c1c','#991b1b','#881337'];
+
+function calcDelayMin(r) {
+  const req = parseDT(r.req);
+  const cin = parseDT(r.checkin);
+  if (!req || !cin) return null;
+  return Math.round((cin - req) / 60000);
+}
+
+function delayCategory(minLate) {
+  if (minLate < 60)   return '<1 jam';
+  if (minLate < 180)  return '1-3 jam';
+  if (minLate < 360)  return '>3-6 jam';
+  if (minLate < 720)  return '>6-12 jam';
+  if (minLate < 1440) return '>12-24 jam';
+  return '>24 jam';
+}
+
+function formatDelay(minDiff) {
+  if (minDiff === null) return '—';
+  const abs = Math.abs(minDiff);
+  const h = Math.floor(abs / 60);
+  const m = abs % 60;
+  if (h === 0) return (minDiff > 0 ? '+' : '−') + m + 'mnt';
+  return (minDiff > 0 ? '+' : '−') + h + 'j' + (m > 0 ? ' ' + m + 'm' : '');
+}
+
+function getDelayStats(f) {
+  const cats = {};
+  DELAY_CATS.forEach(c => cats[c] = 0);
+  Object.entries(D.detail).forEach(([k, arr]) => {
+    if (matchKey(k, f)) arr.forEach(r => {
+      if (matchVal(r.vendor, f.vendor) && matchVal(String(r.day), f.date)) {
+        if (!r.ota) {
+          const min = calcDelayMin(r);
+          if (min !== null && min > 0) cats[delayCategory(min)]++;
+        }
+      }
+    });
+  });
+  return cats;
+}
+
+function renderDelayKpi(f) {
+  const cats = getDelayStats(f);
+  const total = Object.values(cats).reduce((a,b)=>a+b, 0);
+  document.getElementById('delayKpiGrid').innerHTML = DELAY_CATS.map((c, i) => {
+    const n = cats[c];
+    const pct = total > 0 ? Math.round(n / total * 100) : 0;
+    return `<div class="delay-kpi-card" style="border-top-color:${DELAY_BORD[i]};">
+      <div class="delay-kpi-lbl" style="color:${DELAY_COLORS[i]}">${c}</div>
+      <div class="delay-kpi-num" style="color:${DELAY_COLORS[i]}">${n.toLocaleString()}</div>
+      <div class="delay-kpi-pct">${total>0?pct+'% late':'-'}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── BATCH STATS ───────────────────────────────────────────────────────────────
+function getBatchStats(f) {
+  const bm = {};
+  if (f.vendor !== 'ALL' || f.date !== 'ALL' || f.batch !== 'ALL') {
+    Object.entries(D.detail).forEach(([k, arr]) => {
+      if (matchKey(k, f)) {
+        const batch = k.split('|')[3];
+        arr.forEach(r => {
+          if (matchVal(r.vendor,f.vendor) && matchVal(String(r.day),f.date)) {
+            if (!bm[batch]) bm[batch] = {total:0,ot:0,late:0};
+            bm[batch].total++;
+            if (r.ota) bm[batch].ot++; else bm[batch].late++;
+          }
+        });
+      }
+    });
+  } else {
+    Object.entries(D.summary).forEach(([k, v]) => {
+      if (matchKey(k, f)) {
+        const batch = k.split('|')[3];
+        if (!bm[batch]) bm[batch] = {total:0,ot:0,late:0};
+        bm[batch].total += v.total; bm[batch].ot += v.ot; bm[batch].late += v.late;
+      }
+    });
+  }
+  return bm;
+}
+
+// ── RENDER BATCH PERFORMANCE (KPI cards) ─────────────────────────────────────
+function renderBatchPerf(f) {
+  const bm = getBatchStats(f);
+  const batches = Object.keys(bm).sort();
+  const el = document.getElementById('batchKpiGrid');
+  if (!el) return;
+
+  const gradeOf = p => p>=80?'A':p>=60?'B':p>=40?'C':'D';
+  const colOf   = p => p>=80?'#4ade80':p>=60?'#fbbf24':p>=40?'#fb923c':'#f87171';
+  const borOf   = p => p>=80?'#22c55e':p>=60?'#f59e0b':p>=40?'#f97316':'#ef4444';
+  const noteOf  = p => p>=80?'Sangat Baik':p>=60?'Baik':p>=40?'Perlu Perbaikan':'Kritis';
+
+  if (batches.length === 0) {
+    el.innerHTML = '<div style="color:#64748b;font-size:.75rem;padding:8px 0;">Tidak ada data batch.</div>';
+    return;
+  }
+
+  el.innerHTML = batches.map(b => {
+    const s = bm[b];
+    const pct = s.total > 0 ? Math.round(s.ot / s.total * 100) : 0;
+    const grade = gradeOf(pct); const col = colOf(pct); const bor = borOf(pct);
+    return `<div class="batch-kpi-card" style="border-top-color:${bor}">
+      <div class="batch-kpi-name">📦 ${b}</div>
+      <div class="batch-kpi-rate" style="color:${col}">${pct}%</div>
+      <div class="batch-kpi-grade grade-${grade}">Grade ${grade} · ${noteOf(pct)}</div>
+      <div class="batch-kpi-bar"><div class="batch-kpi-bar-fill" style="width:${pct}%;background:${bor}"></div></div>
+      <div class="batch-kpi-counts">
+        <span style="color:#4ade80">✅${s.ot}</span>
+        <span style="color:#f87171">⚠️${s.late}</span>
+        <span style="color:#60a5fa">📦${s.total}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// LOADING PERFORMANCE
+// ══════════════════════════════════════════════════════════════════════════════
+
+// Map supply site + col O → internal LP site key
+function getLPSiteKey(supSite, colO) {
+  const s = (supSite||'').toUpperCase().trim();
+  if (s.includes('SIDOARJO')) {
+    const t = (colO||'').toUpperCase().trim();
+    return t === 'HCI' ? 'NDC HCI Sidoarjo' : 'NDC AHI Sidoarjo';
+  }
+  if (s.includes('HCI') && (s.includes('JABABEKA') || s.includes('JBBK'))) return 'NDC HCI Jababeka';
+  if (s.includes('AHI') && (s.includes('JABABEKA') || s.includes('JBBK'))) return 'NDC AHI Jababeka';
+  if (s.includes('HCI') && (s.includes('CIKUPA')   || s.includes('CKP')))  return 'NDC HCI Cikupa';
+  return null; // site not in LP scope
+}
+
+// DC code per site key (for target lookup)
+const LP_SITE_DC = {
+  'NDC HCI Jababeka': 'HCI_JBBK',
+  'NDC AHI Jababeka': 'AHI_JBBK',
+  'NDC HCI Cikupa'  : 'HCI_CKP',
+  'NDC HCI Sidoarjo': 'HCI_SDJ',
+  'NDC AHI Sidoarjo': 'AHI_SDJ',
+};
+
+// Target loading time (minutes) per armada per DC  [screenshot table — IND JBBK ignored]
+const LP_TARGETS = {
+  'LOSBAK'   : {HCI_JBBK:45,  AHI_JBBK:30,  HCI_CKP:45,  HCI_SDJ:45,  AHI_SDJ:45,  STD:45},
+  'CDEL'     : {HCI_JBBK:90,  AHI_JBBK:60,  HCI_CKP:60,  HCI_SDJ:60,  AHI_SDJ:60,  STD:60},
+  'CDDL'     : {HCI_JBBK:90,  AHI_JBBK:90,  HCI_CKP:60,  HCI_SDJ:75,  AHI_SDJ:90,  STD:90},
+  'FUSO'     : {HCI_JBBK:150, AHI_JBBK:150, HCI_CKP:150, HCI_SDJ:135, AHI_SDJ:150, STD:150},
+  'WINGBOX'  : {HCI_JBBK:180, AHI_JBBK:180, HCI_CKP:210, HCI_SDJ:150, AHI_SDJ:180, STD:180},
+  'CONT 20FT': {HCI_JBBK:150, AHI_JBBK:120, HCI_CKP:120, HCI_SDJ:120, AHI_SDJ:120, STD:120},
+  'CONT 40FT': {HCI_JBBK:270, AHI_JBBK:240, HCI_CKP:240, HCI_SDJ:240, AHI_SDJ:240, STD:240},
+};
+
+const LP_ARMADA_LABELS = {
+  'LOSBAK'   : 'LOSBAK / PICKUP / MVB',
+  'CDEL'     : 'CDEL',
+  'CDDL'     : 'CDDL',
+  'FUSO'     : 'FUSO',
+  'WINGBOX'  : 'WINGBOX (WB)',
+  'CONT 20FT': 'CONTAINER 20FT',
+  'CONT 40FT': 'CONTAINER 40FT',
+};
+const LP_ARM_ORDER = ['LOSBAK','CDEL','CDDL','FUSO','WINGBOX','CONT 20FT','CONT 40FT'];
+
+const _unknownArmadaRaw = new Set();
+function normalizeArmada(raw) {
+  if (!raw) return 'UNKNOWN';
+  const t = raw.toUpperCase().trim();
+  if (t.includes('LOSBAK') || t.includes('PICK UP') || t.includes('PICKUP') || t === 'MVB') return 'LOSBAK';
+  // CDD / CDDL variants (must check before CDE to avoid partial match)
+  if (t === 'CDDL' || t === 'CDD' || t.includes('DDL') || t.includes('CDD')) return 'CDDL';
+  // CDE / CDEL variants
+  if (t === 'CDEL' || t === 'CDE' || t.includes('CDEL') || (t.includes('DEL') && !t.includes('DDL'))) return 'CDEL';
+  if (t.includes('FUSO')) return 'FUSO';
+  if (t.includes('WING') || t === 'WB') return 'WINGBOX';
+  // Container: cek pola eksplisit dulu sebelum fallback angka
+  if (t.includes('CONT') && t.includes('20')) return 'CONT 20FT';
+  if (t.includes('CONT') && t.includes('40')) return 'CONT 40FT';
+  if (t === 'CONT-20' || t === '20FT' || t === 'CONTAINER 20' || t === 'CONTAINER 20FT') return 'CONT 20FT';
+  if (t === 'CONT-40' || t === '40FT' || t === 'CONTAINER 40' || t === 'CONTAINER 40FT') return 'CONT 40FT';
+  if (t.includes('20')) return 'CONT 20FT';
+  if (t.includes('40')) return 'CONT 40FT';
+  if (t.includes('TRAILER')) return 'CDDL';
+  if (t.includes('BIG MAMA') || t === 'BIGMAMA') return 'WINGBOX';
+  // Tidak ke-match — log raw value untuk debug
+  _unknownArmadaRaw.add(raw.trim());
+  console.warn('[normalizeArmada] UNKNOWN raw value:', JSON.stringify(raw.trim()));
+  return t;
+}
+
+function fmtMin(min) {
+  if (min === null || min === undefined) return '—';
+  if (min < 0) return '<0';
+  const h = Math.floor(min / 60), m = min % 60;
+  if (h === 0) return m + ' mnt';
+  return h + 'j' + (m > 0 ? ' ' + m + 'm' : '');
+}
+
+let LP = { sites:[], months:[], armadas:[], vendors:[], summary:{}, daily:{}, vendor:{}, detail:{} };
+
+function buildLP(rows) {
+  const MON_ORDER = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const sites=new Set(), months=new Set(), armadas=new Set(), vendors=new Set(), bus=new Set();
+  const summary={}, daily={}, vendor={}, detail={};
+  let skipped = 0;
+
+  rows.forEach(row => {
+    const supSite  = row['Supply site'] || '';
+    const colO     = row['__colO__']    || '';
+    const siteKey  = getLPSiteKey(supSite, colO);
+    if (!siteKey) { skipped++; return; }
+
+    const month   = row['Month']   || '';
+    const vdr     = row['Vendor']  || '';
+    const noSI    = row['No SI']   || '';
+    const bu      = row['BU']      || '';
+    const reqStr  = row['Req Stuffing'] || '';
+    const cinStr  = row['Checkin']      || '';
+    const coutStr = row['Checkout']     || '';
+
+    // flexible column names for Open, Close, Armada
+    const openStr   = row['Open']  || row['Jam Open']  || row['Waktu Open']  || row['open']  || '';
+    const closeStr  = row['Close'] || row['Jam Close'] || row['Waktu Close'] || row['close'] || '';
+    const armadaRaw = row['__colD__'] || row['Type Armada'] || row['Tipe Armada'] || row['Armada'] || row['Type Kendaraan'] || row['Jenis Kendaraan'] || '';
+
+    if (!month || !openStr || !closeStr) { skipped++; return; }
+
+    const openDT  = parseDT(openStr);
+    const closeDT = parseDT(closeStr);
+    if (!openDT || !closeDT) { skipped++; return; }
+
+    const reqDT  = parseDT(reqStr);
+    const cinDT  = parseDT(cinStr);
+    const coutDT = parseDT(coutStr);
+
+    // start reference: whichever is later between Req Stuff & Checkin
+    const startDT = (reqDT && cinDT) ? (reqDT > cinDT ? reqDT : cinDT)
+                  : reqDT ? reqDT
+                  : cinDT ? cinDT : null;
+
+    const tungguMin  = startDT ? Math.round((openDT  - startDT) / 60000) : null;
+    const loadingMin = Math.round((closeDT - openDT)  / 60000);
+    const agingMin   = (startDT && coutDT) ? Math.round((coutDT - startDT) / 60000) : null;
+
+    const armada  = normalizeArmada(armadaRaw);
+    const dcKey   = LP_SITE_DC[siteKey];
+    const target  = (LP_TARGETS[armada] && dcKey) ? LP_TARGETS[armada][dcKey] : null;
+    const ontime  = target !== null ? loadingMin <= target : null;
+    const day     = openDT.getDate();
+
+    sites.add(siteKey); months.add(month); armadas.add(armada); vendors.add(vdr); bus.add(bu);
+
+    const sk = siteKey+'|'+month+'|'+armada+'|'+bu;
+    const dk = sk+'|'+day;
+    const vk = sk+'|'+vdr;
+
+    const upd = (obj) => {
+      obj.total++;
+      if (ontime === true) obj.ontime++;
+      obj.sumLoading += loadingMin;
+      if (tungguMin !== null) { obj.sumTunggu += tungguMin; obj.cTunggu++; }
+      if (agingMin  !== null) { obj.sumAging  += agingMin;  obj.cAging++;  }
+    };
+    const mk = () => ({total:0,ontime:0,sumLoading:0,sumTunggu:0,sumAging:0,cTunggu:0,cAging:0});
+    if (!summary[sk]) summary[sk] = mk(); upd(summary[sk]);
+    if (!daily[dk])   daily[dk]   = mk(); upd(daily[dk]);
+    if (!vendor[vk])  vendor[vk]  = mk(); upd(vendor[vk]);
+
+    if (!detail[sk]) detail[sk] = [];
+    detail[sk].push({noSI,vendor:vdr,siteKey,armada,month,day,
+      tungguMin,loadingMin,agingMin,ontime,target});
+  });
+
+  const LP_SITE_ORDER = ['NDC HCI Jababeka','NDC AHI Jababeka','NDC HCI Cikupa','NDC HCI Sidoarjo','NDC AHI Sidoarjo'];
+  const sortedSites   = [...sites].sort((a,b)=>LP_SITE_ORDER.indexOf(a)-LP_SITE_ORDER.indexOf(b));
+  const sortedMonths  = [...months].sort((a,b)=>['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].indexOf(a)-['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].indexOf(b));
+  const sortedArmadas = [...armadas].sort((a,b)=>{const ai=LP_ARM_ORDER.indexOf(a),bi=LP_ARM_ORDER.indexOf(b);if(ai<0&&bi<0)return a.localeCompare(b);if(ai<0)return 1;if(bi<0)return -1;return ai-bi;});
+  const sortedVendors = [...vendors].sort();
+  const sortedBus     = [...bus].sort();
+
+  console.log('[LP] Sites:',sortedSites,'Armadas:',[...armadas],'Skipped:',skipped,'Summary keys:',Object.keys(summary).length);
+  if(_unknownArmadaRaw.size>0) console.warn('[LP] Raw armada values tidak ter-mapping:',[..._unknownArmadaRaw]);
+  return {sites:sortedSites,months:sortedMonths,armadas:sortedArmadas,vendors:sortedVendors,bus:sortedBus,summary,daily,vendor,detail};
+}
+
+// ── LP FILTER HELPERS ────────────────────────────────────────────────────────
+function getLPF() {
+  return {
+    site:   getMS('lpMsSite'),
+    month:  getMS('lpMsMonth'),
+    armada: getMS('lpMsArmada'),
+    bu:     getMS('lpMsBU'),
+    vendor: getMS('lpMsVendor'),
+    date:   getMS('lpMsDate'),
+  };
+}
+
+function matchLPKey(k, f) {
+  const p = k.split('|');
+  return matchVal(p[0],f.site) && matchVal(p[1],f.month) && matchVal(p[2],f.armada) && matchVal(p[3],f.bu);
+}
+function matchLPDayKey(k, f) {
+  const p = k.split('|');
+  return matchVal(p[0],f.site) && matchVal(p[1],f.month) && matchVal(p[2],f.armada) && matchVal(p[3],f.bu) && matchVal(String(p[4]),f.date);
+}
+function matchLPVKey(k, f) {
+  const p = k.split('|');
+  return matchVal(p[0],f.site) && matchVal(p[1],f.month) && matchVal(p[2],f.armada) && matchVal(p[3],f.bu) && matchVal(p[4],f.vendor);
+}
+
+function needDetailLP(f) { return f.vendor !== 'ALL' || f.date !== 'ALL'; }
+
+// ── LP STATS ─────────────────────────────────────────────────────────────────
+function getLPStats(f) {
+  let total=0,ontime=0,sumTunggu=0,sumLoading=0,sumAging=0,cTunggu=0,cAging=0;
+  if (needDetailLP(f)) {
+    Object.entries(LP.detail).forEach(([k,arr])=>{
+      if(matchLPKey(k,f)) arr.forEach(r=>{
+        if(matchVal(r.vendor,f.vendor) && matchVal(String(r.day),f.date)){
+          total++; if(r.ontime===true) ontime++;
+          sumLoading+=r.loadingMin;
+          if(r.tungguMin!==null){sumTunggu+=r.tungguMin;cTunggu++;}
+          if(r.agingMin !==null){sumAging +=r.agingMin; cAging++; }
+        }
+      });
+    });
+  } else {
+    Object.entries(LP.summary).forEach(([k,v])=>{
+      if(matchLPKey(k,f)){
+        total+=v.total; ontime+=v.ontime; sumLoading+=v.sumLoading;
+        sumTunggu+=v.sumTunggu; cTunggu+=v.cTunggu;
+        sumAging +=v.sumAging;  cAging +=v.cAging;
+      }
+    });
+  }
+  return {
+    total, ontime, late:total-ontime,
+    otRate: total>0 ? Math.round(ontime/total*100) : 0,
+    avgTunggu : cTunggu>0 ? Math.round(sumTunggu/cTunggu)   : null,
+    avgLoading: total>0   ? Math.round(sumLoading/total)     : null,
+    avgAging  : cAging>0  ? Math.round(sumAging/cAging)      : null,
+  };
+}
+
+function getLPDayStats(f) {
+  const map={};
+  if (needDetailLP(f)) {
+    Object.entries(LP.detail).forEach(([k,arr])=>{
+      if(matchLPKey(k,f)) arr.forEach(r=>{
+        if(matchVal(r.vendor,f.vendor) && matchVal(String(r.day),f.date)){
+          if(!map[r.day]) map[r.day]={total:0,ontime:0};
+          map[r.day].total++; if(r.ontime===true) map[r.day].ontime++;
+        }
+      });
+    });
+  } else {
+    Object.entries(LP.daily).forEach(([k,v])=>{
+      if(matchLPDayKey(k,f)){
+        const day=parseInt(k.split('|')[4]);
+        if(!map[day]) map[day]={total:0,ontime:0};
+        map[day].total+=v.total; map[day].ontime+=v.ontime;
+      }
+    });
+  }
+  return map;
+}
+
+function getLPArmadaStats(f) {
+  const am={};
+  if (needDetailLP(f)) {
+    Object.entries(LP.detail).forEach(([k,arr])=>{
+      if(matchLPKey(k,f)) arr.forEach(r=>{
+        if(matchVal(r.vendor,f.vendor) && matchVal(String(r.day),f.date)){
+          if(!am[r.armada]) am[r.armada]={total:0,ontime:0,sumLoading:0};
+          am[r.armada].total++; if(r.ontime===true) am[r.armada].ontime++;
+          am[r.armada].sumLoading+=r.loadingMin;
+        }
+      });
+    });
+  } else {
+    Object.entries(LP.summary).forEach(([k,v])=>{
+      if(matchLPKey(k,f)){
+        const arm=k.split('|')[2];
+        if(!am[arm]) am[arm]={total:0,ontime:0,sumLoading:0};
+        am[arm].total+=v.total; am[arm].ontime+=v.ontime; am[arm].sumLoading+=v.sumLoading;
+      }
+    });
+  }
+  return am;
+}
+
+// Stats per site → per armada (untuk grid 5-baris)
+function getLPSiteArmadaStats(f) {
+  const result={};
+  if (needDetailLP(f)) {
+    Object.entries(LP.detail).forEach(([k,arr])=>{
+      if(matchLPKey(k,f)){
+        const site=k.split('|')[0];
+        arr.forEach(r=>{
+          if(matchVal(r.vendor,f.vendor)&&matchVal(String(r.day),f.date)){
+            if(!result[site]) result[site]={};
+            if(!result[site][r.armada]) result[site][r.armada]={total:0,ontime:0,sumLoading:0};
+            result[site][r.armada].total++;
+            if(r.ontime===true) result[site][r.armada].ontime++;
+            result[site][r.armada].sumLoading+=r.loadingMin;
+          }
+        });
+      }
+    });
+  } else {
+    Object.entries(LP.summary).forEach(([k,v])=>{
+      if(matchLPKey(k,f)){
+        const parts=k.split('|');
+        const site=parts[0], arm=parts[2];
+        if(!result[site]) result[site]={};
+        if(!result[site][arm]) result[site][arm]={total:0,ontime:0,sumLoading:0};
+        result[site][arm].total+=v.total;
+        result[site][arm].ontime+=v.ontime;
+        result[site][arm].sumLoading+=v.sumLoading;
+      }
+    });
+  }
+  return result;
+}
+
+function getLPVendorStats(f) {
+  const vm={};
+  if (needDetailLP(f)) {
+    Object.entries(LP.detail).forEach(([k,arr])=>{
+      if(matchLPKey(k,f)) arr.forEach(r=>{
+        if(matchVal(r.vendor,f.vendor) && matchVal(String(r.day),f.date)){
+          if(!vm[r.vendor]) vm[r.vendor]={total:0,ontime:0,sumLoading:0};
+          vm[r.vendor].total++; if(r.ontime===true) vm[r.vendor].ontime++;
+          vm[r.vendor].sumLoading+=r.loadingMin;
+        }
+      });
+    });
+  } else {
+    Object.entries(LP.vendor).forEach(([k,v])=>{
+      if(matchLPKey(k,{...f,vendor:'ALL'})){
+        const vdr=k.split('|')[4];
+        if(matchVal(vdr,f.vendor)){
+          if(!vm[vdr]) vm[vdr]={total:0,ontime:0,sumLoading:0};
+          vm[vdr].total+=v.total; vm[vdr].ontime+=v.ontime; vm[vdr].sumLoading+=v.sumLoading;
+        }
+      }
+    });
+  }
+  return vm;
+}
+
+function getLPDetailRows(f) {
+  const rows=[];
+  Object.entries(LP.detail).forEach(([k,arr])=>{
+    if(matchLPKey(k,f)) arr.forEach(r=>{
+      if(matchVal(r.vendor,f.vendor) && matchVal(String(r.day),f.date)) rows.push(r);
+    });
+  });
+  rows.sort((a,b)=>{if(a.ontime===false&&b.ontime!==false)return -1;if(a.ontime!==false&&b.ontime===false)return 1;return(a.noSI||'').localeCompare(b.noSI||'');});
+  return rows.slice(0,100);
+}
+
+// ── LP RENDER ────────────────────────────────────────────────────────────────
+function renderLP3Metric(s) {
+  const el=document.getElementById('lp3MetricGrid'); if(!el) return;
+  const otCol=s.otRate>=80?'#4ade80':s.otRate>=60?'#fbbf24':'#f87171';
+  el.innerHTML=`
+    <div class="lp-metric-card tunggu">
+      <div class="lp-metric-icon">⏳</div>
+      <div class="lp-metric-label">Tunggu Muat</div>
+      <div class="lp-metric-value">${fmtMin(s.avgTunggu)}</div>
+      <div class="lp-metric-sub">max(Req Stuff, Checkin) → Open</div>
+      <div class="lp-metric-rate" style="color:#94a3b8">Lama armada menunggu sebelum loading</div>
+    </div>
+    <div class="lp-metric-card loading">
+      <div class="lp-metric-icon">⏱️</div>
+      <div class="lp-metric-label">Loading Time</div>
+      <div class="lp-metric-value">${fmtMin(s.avgLoading)}</div>
+      <div class="lp-metric-sub">Open → Close</div>
+      <div class="lp-metric-rate" style="color:${otCol}">✅ On Time: ${s.otRate}% &nbsp;·&nbsp; ${s.ontime} / ${s.total} trip</div>
+    </div>
+    <div class="lp-metric-card aging">
+      <div class="lp-metric-icon">🏭</div>
+      <div class="lp-metric-label">Aging DC</div>
+      <div class="lp-metric-value">${fmtMin(s.avgAging)}</div>
+      <div class="lp-metric-sub">max(Req Stuff, Checkin) → Checkout</div>
+      <div class="lp-metric-rate" style="color:#94a3b8">Total waktu armada di area DC</div>
+    </div>`;
+}
+
+const LP_SITE_COLORS = {
+  'NDC HCI Jababeka':'#3b82f6',
+  'NDC AHI Jababeka':'#8b5cf6',
+  'NDC HCI Cikupa'  :'#10b981',
+  'NDC HCI Sidoarjo':'#f59e0b',
+  'NDC AHI Sidoarjo':'#ef4444',
+};
+const LP_SITE_ORDER_RENDER = ['NDC HCI Jababeka','NDC AHI Jababeka','NDC HCI Cikupa','NDC HCI Sidoarjo','NDC AHI Sidoarjo'];
+
+function renderLPArmada(f) {
+  const sa = getLPSiteArmadaStats(f);
+  const el = document.getElementById('lpArmadaGrid'); if(!el) return;
+
+  // Filter sites sesuai filter aktif
+  const activeSites = LP_SITE_ORDER_RENDER.filter(s => {
+    if(!sa[s]) return false;
+    if(f.site==='ALL') return true;
+    if(Array.isArray(f.site)) return f.site.includes(s);
+    return f.site===s;
+  });
+
+  if(!activeSites.length){
+    el.innerHTML='<div style="color:#64748b;font-size:.75rem;padding:8px 0;">Tidak ada data armada.</div>';
+    return;
+  }
+
+  el.innerHTML = activeSites.map(site=>{
+    const dcKey  = LP_SITE_DC[site];
+    const armMap = sa[site];
+    const siteCol= LP_SITE_COLORS[site]||'#64748b';
+
+    // Urutkan armada sesuai LP_ARM_ORDER, tambahkan unknown di belakang
+    const sortedArms = LP_ARM_ORDER.filter(a=>armMap[a])
+      .concat(Object.keys(armMap).filter(a=>LP_ARM_ORDER.indexOf(a)<0).sort());
+
+    const cards = sortedArms.map(arm=>{
+      const s   = armMap[arm];
+      const avg = s.total>0 ? Math.round(s.sumLoading/s.total) : 0;
+      const pct = s.total>0 ? Math.round(s.ontime/s.total*100) : 0;
+      const tgt = LP_TARGETS[arm] ? (LP_TARGETS[arm][dcKey]||LP_TARGETS[arm].STD) : null;
+      const col = pct>=80?'#4ade80':pct>=60?'#fbbf24':'#f87171';
+      const bor = pct>=80?'#22c55e':pct>=60?'#f59e0b':'#ef4444';
+      const fillW = tgt ? Math.min(Math.round(avg/tgt*100),130) : 50;
+      const barC  = tgt && avg<=tgt ? '#22c55e' : '#ef4444';
+      return `<div class="lp-armada-card" style="border-top-color:${bor}">
+        <div class="lp-arm-name">${LP_ARMADA_LABELS[arm]||arm}</div>
+        <div class="lp-arm-time" style="color:${col}">${fmtMin(avg)}</div>
+        <div class="lp-arm-target">Target: ${tgt?fmtMin(tgt):'—'}</div>
+        <div class="lp-arm-bar"><div class="lp-arm-bar-fill" style="width:${Math.min(fillW,100)}%;background:${barC}"></div></div>
+        <div class="lp-arm-counts">
+          <span style="color:${col}">OT ${pct}%</span>
+          <span style="color:#4ade80">✅${s.ontime}</span>
+          <span style="color:#60a5fa">📦${s.total}</span>
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div class="lp-site-row">
+      <div class="lp-site-row-label" style="border-left:3px solid ${siteCol};color:${siteCol}">🏭 ${site}</div>
+      <div class="lp-armada-row-grid">${cards}</div>
+    </div>`;
+  }).join('');
+}
+
+let lpCDay=null;
+function renderLPDayChart(dm) {
+  const days=Object.keys(dm).map(Number).sort((a,b)=>a-b);
+  const pcts=days.map(d=>dm[d].total>0?Math.round(dm[d].ontime/dm[d].total*100):0);
+  const ctx=document.getElementById('lpChartDaily'); if(!ctx) return;
+  if(lpCDay) lpCDay.destroy();
+  lpCDay=new Chart(ctx.getContext('2d'),{
+    type:'bar',
+    data:{labels:days.map(d=>`${d}`),datasets:[{label:'On Time Loading %',data:pcts,
+      backgroundColor:pcts.map(p=>p>=80?'#22c55e55':p>=60?'#f59e0b55':'#ef444455'),
+      borderColor:pcts.map(p=>p>=80?'#22c55e':p>=60?'#f59e0b':'#ef4444'),
+      borderWidth:1.5,borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:16}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{
+        title:c=>`Tgl ${c[0].label}`,
+        label:c=>{const d=days[c.dataIndex];return ` On Time: ${c.raw}% (${dm[d].ontime} OT / ${dm[d].total} trip)`;}
+      }}},
+      scales:{
+        x:{ticks:{color:'#64748b',font:{size:9}},grid:{color:'#1e293b'}},
+        y:{min:0,max:100,ticks:{color:'#64748b',callback:v=>v+'%',font:{size:9}},grid:{color:'#1e293b66'}}
+      }},
+    plugins:[barLabelPlugin]
+  });
+}
+
+function renderLPSiteSummary(f) {
+  const sec=document.getElementById('lpSiteSummarySection'); if(!sec) return;
+  const singleSite = f.site!=='ALL' && (!Array.isArray(f.site)||f.site.length===1);
+  if(singleSite){sec.style.display='none';return;}
+  sec.style.display='block';
+  const sm={};
+  LP.sites.forEach(s=>sm[s]={total:0,ontime:0,sumLoading:0});
+  Object.entries(LP.summary).forEach(([k,v])=>{
+    const s=k.split('|')[0];
+    if(matchLPKey(k,{...f,site:'ALL'})&&sm[s]){sm[s].total+=v.total;sm[s].ontime+=v.ontime;sm[s].sumLoading+=v.sumLoading;}
+  });
+  document.getElementById('lpSiteSummaryGrid').innerHTML=LP.sites.map(s=>{
+    const st=sm[s]; if(!st||!st.total) return '';
+    const pct=Math.round(st.ontime/st.total*100);
+    const avg=Math.round(st.sumLoading/st.total);
+    const col=pct>=80?'#4ade80':pct>=60?'#fbbf24':'#f87171';
+    const bg =pct>=80?'#14532d':pct>=60?'#451a03':'#450a0a';
+    return `<div class="site-card">
+      <div class="site-card-name">🏭 ${s}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">
+        <span class="site-ota-pct" style="color:${col}">${pct}%</span>
+        <span style="font-size:.66rem;background:${bg};color:${col};padding:2px 7px;border-radius:8px;">On Time</span>
+      </div>
+      <div class="ota-bar-bg" style="margin-bottom:7px;height:7px;"><div class="ota-bar-fill" style="width:${pct}%;background:${col};height:7px;"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:.66rem;color:#94a3b8;">
+        <span>✅ ${st.ontime}</span><span>⏱️ ${fmtMin(avg)}</span><span>📦 ${st.total}</span>
+      </div>
+    </div>`;
+  }).filter(Boolean).join('');
+}
+
+function renderLPVendorTable(vm) {
+  const entries=Object.entries(vm)
+    .map(([v,s])=>({v,total:s.total,ontime:s.ontime,avg:s.total>0?Math.round(s.sumLoading/s.total):0,pct:s.total>0?Math.round(s.ontime/s.total*100):0}))
+    .sort((a,b)=>b.total-a.total);
+  document.getElementById('lpVendorTableBody').innerHTML=entries.map(e=>{
+    const col=e.pct>=80?'#4ade80':e.pct>=60?'#fbbf24':'#f87171';
+    const cls=e.pct>=80?'good':e.pct>=60?'mid':'bad';
+    return `<tr>
+      <td><strong>${e.v}</strong></td><td>${e.total}</td>
+      <td class="good">${e.ontime}</td>
+      <td style="color:#fbbf24;font-weight:600">${fmtMin(e.avg)}</td>
+      <td><div class="ota-bar-wrap"><div class="ota-bar-bg"><div class="ota-bar-fill" style="width:${e.pct}%;background:${col}"></div></div><span class="ota-pct ${cls}">${e.pct}%</span></div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderLPDetail(rows) {
+  document.getElementById('lpDetailTableBody').innerHTML=rows.map(r=>{
+    const sCls=r.ontime===true?'ot':r.ontime===false?'late':'';
+    const sTxt=r.ontime===true?'ON TIME':r.ontime===false?'LATE':'—';
+    const tgtTxt=r.target?`<span style="color:#475569;font-size:.58rem;">(std ${fmtMin(r.target)})</span>`:'';
+    return `<tr>
+      <td style="font-size:.62rem;color:#94a3b8">${r.noSI}</td>
+      <td style="font-size:.66rem">${LP_ARMADA_LABELS[r.armada]||r.armada}</td>
+      <td style="font-size:.7rem;color:#c084fc;font-weight:600">${fmtMin(r.tungguMin)}</td>
+      <td style="font-size:.7rem;font-weight:600;color:#fbbf24">${fmtMin(r.loadingMin)} ${tgtTxt}</td>
+      <td style="font-size:.7rem;color:#22d3ee;font-weight:600">${fmtMin(r.agingMin)}</td>
+      <td><span class="status-badge ${sCls}">${sTxt}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── LP FILTER MANAGEMENT ─────────────────────────────────────────────────────
+function initLP() {
+  buildMS('lpMsSite',   LP.sites,   'Site');
+  buildMS('lpMsMonth',  LP.months,  'Bulan');
+  buildMS('lpMsArmada', LP.armadas, 'Armada');
+  buildMS('lpMsBU',     LP.bus,     'BU');
+  populateLPVendors(getLPF());
+  populateLPDays(getLPF());
+  lpApplyFilters();
+  const tot=Object.values(LP.summary).reduce((s,v)=>s+v.total,0);
+  document.getElementById('lpFooterTotal').textContent=tot.toLocaleString('id-ID');
+}
+
+function populateLPVendors(f) {
+  const cur=getMS('lpMsVendor');
+  const seen=new Set();
+  Object.keys(LP.vendor).forEach(k=>{if(matchLPKey(k,{...f,vendor:'ALL',armada:f.armada}))seen.add(k.split('|')[4]);});
+  buildMS('lpMsVendor',[...seen].sort(),'Vendor');
+  if(cur!=='ALL'){
+    const el=document.getElementById('lpMsVendor');
+    const opts=[...seen].sort();
+    if(el){
+      const valid=cur.filter(v=>opts.includes(v));
+      if(valid.length>0){
+        el.querySelectorAll('input.ms-cb').forEach(cb=>{cb.checked=valid.includes(cb.value);});
+        setMSLabel('lpMsVendor','Vendor');
+      }
+    }
+  }
+}
+
+function populateLPDays(f) {
+  const cur=getMS('lpMsDate'); // simpan seleksi sebelumnya
+  const seen=new Set();
+  Object.keys(LP.daily).forEach(k=>{if(matchLPKey(k,f))seen.add(parseInt(k.split('|')[4]));});
+  const opts=[...seen].sort((a,b)=>a-b);
+  buildMS('lpMsDate',opts.map(String),'Tgl');
+  const el=document.getElementById('lpMsDate');
+  if(el){
+    el.querySelectorAll('input.ms-cb').forEach((cb,i)=>{
+      const lbl=cb.closest('label'); if(lbl) lbl.lastChild.textContent=' Tgl '+opts[i];
+    });
+    // Restore seleksi sebelumnya yang masih valid
+    if(cur!=='ALL'){
+      const valid=cur.filter(v=>opts.map(String).includes(v));
+      if(valid.length>0){
+        el.querySelectorAll('input.ms-cb').forEach(cb=>{cb.checked=valid.includes(cb.value);});
+        setMSLabel('lpMsDate','Tgl');
+      }
+    }
+  }
+}
+
+function onLPFilterChange() {
+  const f=getLPF();
+  populateLPVendors(f); populateLPDays(f); lpApplyFilters();
+}
+
+function resetLPFilters() {
+  ['lpMsSite','lpMsMonth','lpMsArmada','lpMsBU','lpMsVendor','lpMsDate'].forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    el.querySelectorAll('input').forEach(cb=>{cb.checked=false;cb.indeterminate=false;});
+    el.classList.remove('ms-active');
+    const lbl=el.querySelector('.ms-label');
+    if(lbl){const map={lpMsSite:'Semua Site',lpMsMonth:'Semua Bulan',lpMsArmada:'Semua Armada',lpMsBU:'Semua BU',lpMsVendor:'Semua Vendor',lpMsDate:'Semua Tgl'};lbl.textContent=map[id]||'Semua';}
+  });
+  lpApplyFilters();
+}
+
+function buildLPTag(f) {
+  const pts=[];
+  const s=fmtFilter(f.site);    if(s) pts.push(s);
+  const m=fmtFilter(f.month);   if(m) pts.push(m);
+  const a=fmtFilter(f.armada);  if(a) pts.push(a);
+  const bu=fmtFilter(f.bu);     if(bu) pts.push(bu);
+  const v=fmtFilter(f.vendor);  if(v) pts.push(v);
+  const d=fmtFilter(f.date,'Tgl '); if(d) pts.push(d);
+  return pts.length?pts.join(' · '):'All Filter';
+}
+
+function lpApplyFilters() {
+  if(!LP.sites.length) return;
+  const f=getLPF();
+  const s=getLPStats(f);
+  const otCol=s.otRate>=80?'#4ade80':s.otRate>=60?'#fbbf24':'#f87171';
+  document.getElementById('lpKpiTotal').textContent=s.total.toLocaleString('id-ID');
+  document.getElementById('lpKpiOT').textContent=s.otRate+'%';
+  document.getElementById('lpKpiOT').style.color=otCol;
+  document.getElementById('lpKpiOTSub').textContent=s.otRate>=80?'✅ Target Tercapai':s.otRate>=60?'⚠️ Perlu Perhatian':'🔴 Di Bawah Target';
+  document.getElementById('lpKpiTunggu').textContent=fmtMin(s.avgTunggu);
+  document.getElementById('lpKpiLoading').textContent=fmtMin(s.avgLoading);
+  document.getElementById('lpFilterCount').textContent=s.total.toLocaleString('id-ID');
+  document.getElementById('lpChartTag').textContent=buildLPTag(f);
+  document.getElementById('lpLastUpdated').textContent=new Date().toLocaleString('id-ID');
+  renderLP3Metric(s);
+  renderLPArmada(f);
+  renderLPDayChart(getLPDayStats(f));
+  renderLPSiteSummary(f);
+  renderLPDetail(getLPDetailRows(f));
+}
+
+// ── TAB SWITCHING ─────────────────────────────────────────────────────────────
+function switchTab(tabId, btn) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tabId).classList.add('active');
+  btn.classList.add('active');
+  const isOta = tabId === 'ota';
+  const isLP  = tabId === 'loading';
+  const isFR  = tabId === 'fulfillment';
+  document.getElementById('headerTripCount').style.display = isOta ? '' : 'none';
+  document.getElementById('headerRefreshBtn').style.display = (isOta || isLP || isFR) ? '' : 'none';
+  const subs = {
+    ota:         'Monitoring ketepatan waktu kedatangan armada',
+    loading:     'Monitoring performa loading armada per site NDC',
+    fulfillment: 'Monitoring pemenuhan permintaan Distribution Channel',
+    analytics:   'Analitik mendalam & insight performa vendor'
+  };
+  document.getElementById('headerSub').textContent = subs[tabId] || '';
+  if (isLP) lpApplyFilters();
+  if (isFR) frApplyFilters();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// FULFILLMENT RATE
+// ══════════════════════════════════════════════════════════════════════════════
+
+let FR = {sites:[], months:[], modas:[], batches:[], dcs:[], bus:[], vendors:[], summary:{}, daily:{}, vendor:{}, detail:{}};
+
+function buildFR(rows) {
+  const MON_ORDER = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const sites=new Set(), months=new Set(), modas=new Set(), batches=new Set(), dcs=new Set(), bus=new Set(), vendors=new Set();
+  const summary={}, daily={}, vendor={}, detail={};
+  let skipped = 0;
+
+  rows.forEach(row => {
+    const site   = row['Supply site'] || '';
+    const noSI   = row['No SI']       || '';
+    const vdr    = row['Vendor']      || '';
+    const tujuan = row['Tujuan']      || '';
+    const area   = row['Area']        || '';
+    const moda   = row['Moda']        || '';
+    const batch  = row['Batch']       || '';
+    const reqStr = row['Req Stuffing']|| '';
+    const cinStr = row['Checkin']     || '';
+    const month  = row['Month']       || '';
+    const bu     = row['BU']          || '';
+
+    if (!site || !month || !batch || !reqStr || !cinStr || !tujuan) { skipped++; return; }
+    const reqDT = parseDT(reqStr);
+    const cinDT = parseDT(cinStr);
+    if (!reqDT || !cinDT) { skipped++; return; }
+
+    // Date-only comparison (strip time — hanya bandingkan tanggal)
+    const reqDate = new Date(reqDT.getFullYear(), reqDT.getMonth(), reqDT.getDate());
+    const cinDate = new Date(cinDT.getFullYear(), cinDT.getMonth(), cinDT.getDate());
+    const hit = cinDate <= reqDate;  // Hit jika checkin date <= req stuffing date
+    const day = reqDT.getDate();
+
+    const dc = tujuan; // Distribution Channel = Tujuan DC
+    sites.add(site); months.add(month); modas.add(moda); batches.add(batch); dcs.add(dc); bus.add(bu); vendors.add(vdr);
+
+    // key: site|month|moda|batch|dc|bu
+    const sk = site+'|'+month+'|'+moda+'|'+batch+'|'+dc+'|'+bu;
+    const dk = sk+'|'+day;
+    const vk = sk+'|'+vdr; // vendor key: site|month|moda|batch|dc|bu|vendor
+
+    if (!summary[sk]) summary[sk]={total:0,hit:0,mis:0};
+    summary[sk].total++; if(hit) summary[sk].hit++; else summary[sk].mis++;
+
+    if (!daily[dk]) daily[dk]={hit:0,mis:0};
+    if(hit) daily[dk].hit++; else daily[dk].mis++;
+
+    if (!vendor[vk]) vendor[vk]={total:0,hit:0,mis:0};
+    vendor[vk].total++; if(hit) vendor[vk].hit++; else vendor[vk].mis++;
+
+    if (!detail[sk]) detail[sk]=[];
+    detail[sk].push({noSI,vendor:vdr,tujuan,area,moda,req:reqStr,checkin:cinStr,hit,day});
+  });
+
+  const sortedSites   = [...sites].sort();
+  const sortedMonths  = [...months].sort((a,b)=>MON_ORDER.indexOf(a)-MON_ORDER.indexOf(b));
+  const sortedModas   = [...modas].sort();
+  const sortedBatches = [...batches].sort();
+  const sortedDCs     = [...dcs].sort();
+  const sortedBus     = [...bus].sort();
+  const sortedVendors = [...vendors].sort();
+  console.log('[FR] Build done. Skipped:', skipped, 'Summary keys:', Object.keys(summary).length);
+  return {sites:sortedSites, months:sortedMonths, modas:sortedModas, batches:sortedBatches, dcs:sortedDCs, bus:sortedBus, vendors:sortedVendors, summary, daily, vendor, detail};
+}
+
+// ── FR FILTER HELPERS ─────────────────────────────────────────────────────────
+function getFRF() {
+  return {
+    site:   getMS('frMsSite'),
+    month:  getMS('frMsMonth'),
+    moda:   getMS('frMsModa'),
+    batch:  getMS('frMsBatch'),
+    dc:     getMS('frMsDC'),
+    bu:     getMS('frMsBU'),
+    vendor: getMS('frMsVendor'),
+    date:   getMS('frMsDate'),
+  };
+}
+
+function matchFRKey(k, f) {
+  const p = k.split('|');
+  // key: site|month|moda|batch|dc|bu
+  return matchVal(p[0],f.site) && matchVal(p[1],f.month) && matchVal(p[2],f.moda) && matchVal(p[3],f.batch) && matchVal(p[4],f.dc) && matchVal(p[5],f.bu);
+}
+
+function matchFRDayKey(k, f) {
+  const p = k.split('|');
+  // key: site|month|moda|batch|dc|bu|day
+  return matchVal(p[0],f.site) && matchVal(p[1],f.month) && matchVal(p[2],f.moda) && matchVal(p[3],f.batch) && matchVal(p[4],f.dc) && matchVal(p[5],f.bu) && matchVal(String(p[6]),f.date);
+}
+
+function matchFRVKey(k, f) {
+  const p = k.split('|');
+  // key: site|month|moda|batch|dc|bu|vendor
+  return matchVal(p[0],f.site) && matchVal(p[1],f.month) && matchVal(p[2],f.moda) && matchVal(p[3],f.batch) && matchVal(p[4],f.dc) && matchVal(p[5],f.bu) && matchVal(p[6],f.vendor);
+}
+
+// ── FR STATS ──────────────────────────────────────────────────────────────────
+function getFRStats(f) {
+  let total=0, hit=0, mis=0;
+  if (f.date !== 'ALL' && f.vendor !== 'ALL') {
+    // Keduanya aktif → pakai detail
+    Object.entries(FR.detail).forEach(([k,arr]) => {
+      if(matchFRKey(k,f)) arr.forEach(r => {
+        if(matchVal(r.vendor,f.vendor) && matchVal(String(r.day),f.date)){
+          total++; if(r.hit) hit++; else mis++;
+        }
+      });
+    });
+  } else if (f.date !== 'ALL') {
+    // Hanya date aktif → pakai daily
+    Object.entries(FR.daily).forEach(([k,v]) => {
+      if(matchFRDayKey(k,f)) { total+=v.hit+v.mis; hit+=v.hit; mis+=v.mis; }
+    });
+  } else if (f.vendor !== 'ALL') {
+    // Hanya vendor aktif → pakai vendor summary
+    Object.entries(FR.vendor).forEach(([k,v]) => {
+      if(matchFRVKey(k,f)) { total+=v.total; hit+=v.hit; mis+=v.mis; }
+    });
+  } else {
+    // Tidak ada filter detail → pakai summary
+    Object.entries(FR.summary).forEach(([k,v]) => {
+      if(matchFRKey(k,f)) { total+=v.total; hit+=v.hit; mis+=v.mis; }
+    });
+  }
+  return {total, hit, mis};
+}
+
+function getFRDayStats(f) {
+  const map={};
+  if (f.vendor !== 'ALL') {
+    // Vendor filter aktif → pakai detail
+    Object.entries(FR.detail).forEach(([k,arr]) => {
+      if(matchFRKey(k,f)) arr.forEach(r => {
+        if(matchVal(r.vendor,f.vendor) && matchVal(String(r.day),f.date)){
+          if(!map[r.day]) map[r.day]={hit:0,mis:0};
+          if(r.hit) map[r.day].hit++; else map[r.day].mis++;
+        }
+      });
+    });
+  } else {
+    Object.entries(FR.daily).forEach(([k,v]) => {
+      const p = k.split('|');
+      if(matchFRKey(k,f) && matchVal(String(p[6]),f.date)) {
+        const day = parseInt(p[6]);
+        if(!map[day]) map[day]={hit:0,mis:0};
+        map[day].hit+=v.hit; map[day].mis+=v.mis;
+      }
+    });
+  }
+  return map;
+}
+
+// ── FR CHART ──────────────────────────────────────────────────────────────────
+let cFRDay = null;
+function renderFRDayChart(dm) {
+  const days = Object.keys(dm).map(Number).sort((a,b)=>a-b);
+  const pcts = days.map(d=>{const t=dm[d].hit+dm[d].mis; return t>0?Math.round(dm[d].hit/t*100):0;});
+  const ctx = document.getElementById('frChartDaily').getContext('2d');
+  if(cFRDay) cFRDay.destroy();
+  cFRDay = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels: days.map(d=>`${d}`),
+      datasets:[{
+        label:'Fulfillment %',
+        data: pcts,
+        backgroundColor: pcts.map(p=>p>=80?'#10b98133':p>=60?'#f59e0b33':'#f9731633'),
+        borderColor: pcts.map(p=>p>=80?'#10b981':p>=60?'#f59e0b':'#f97316'),
+        borderWidth:1.5, borderRadius:4
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      layout:{padding:{top:16}},
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{
+          title:c=>`Tgl ${c[0].label}`,
+          label:c=>{const d=days[c.dataIndex];const t=dm[d].hit+dm[d].mis;return ` Hit: ${c.raw}% (${dm[d].hit} Hit / ${t} total)`;}
+        }}
+      },
+      scales:{
+        x:{ticks:{color:'#64748b',font:{size:9}},grid:{color:'#1e293b'}},
+        y:{min:0,max:100,ticks:{color:'#64748b',callback:v=>v+'%',font:{size:9}},grid:{color:'#1e293b66'}}
+      }
+    },
+    plugins:[{
+      id:'frBarLabels',
+      afterDatasetsDraw(chart) {
+        const {ctx,data}=chart;
+        data.datasets.forEach((ds,i)=>{
+          chart.getDatasetMeta(i).data.forEach((bar,idx)=>{
+            const val=ds.data[idx]; if(val===0) return;
+            const col=val>=80?'#10b981':val>=60?'#f59e0b':'#f97316';
+            ctx.save();
+            ctx.font='bold 8px Segoe UI,Arial,sans-serif';
+            ctx.fillStyle=col; ctx.textAlign='center'; ctx.textBaseline='bottom';
+            ctx.fillText(val+'%',bar.x,bar.y-2);
+            ctx.restore();
+          });
+        });
+      }
+    }]
+  });
+}
+
+// ── FR DC SUMMARY ─────────────────────────────────────────────────────────────
+function renderFRDCSummary(f) {
+  const sec = document.getElementById('frDCSummarySection');
+  const singleDC = f.dc !== 'ALL' && (!Array.isArray(f.dc) || f.dc.length === 1);
+  if (singleDC) { sec.style.display='none'; return; }
+  sec.style.display = 'block';
+
+  // Aggregate per DC — gunakan detail jika date/vendor filter aktif
+  const sm={};
+  const _needDetail = f.date !== 'ALL' || f.vendor !== 'ALL';
+  if (_needDetail) {
+    Object.entries(FR.detail).forEach(([k,arr]) => {
+      const dc = k.split('|')[4];
+      if(matchFRKey(k, {...f, dc:'ALL'})) {
+        arr.forEach(r => {
+          if(matchVal(r.vendor, f.vendor) && matchVal(String(r.day), f.date)){
+            if(!sm[dc]) sm[dc]={hit:0,mis:0};
+            if(r.hit) sm[dc].hit++; else sm[dc].mis++;
+          }
+        });
+      }
+    });
+  } else {
+    Object.entries(FR.summary).forEach(([k,v]) => {
+      const dc = k.split('|')[4];
+      if(matchFRKey(k, {...f, dc:'ALL'})) {
+        if(!sm[dc]) sm[dc]={hit:0,mis:0};
+        sm[dc].hit+=v.hit; sm[dc].mis+=v.mis;
+      }
+    });
+  }
+
+  // Search
+  const searchQ = (document.getElementById('frDCSearch')?.value || '').toLowerCase().trim();
+  // Sort
+  const sortBy  = document.getElementById('frDCSortBy')?.value || 'total_desc';
+
+  const sorters = {
+    total_desc: (a,b) => b.total - a.total,
+    rate_desc:  (a,b) => b.pct  - a.pct  || b.total - a.total,
+    rate_asc:   (a,b) => a.pct  - b.pct  || b.total - a.total,
+    name_asc:   (a,b) => a.dc.localeCompare(b.dc),
+  };
+
+  let entries = Object.entries(sm)
+    .map(([dc, st]) => {
+      const total = st.hit + st.mis;
+      const pct   = total > 0 ? Math.round(st.hit / total * 100) : 0;
+      return {dc, hit:st.hit, mis:st.mis, total, pct};
+    })
+    .filter(e => !searchQ || e.dc.toLowerCase().includes(searchQ))
+    .sort(sorters[sortBy] || sorters.total_desc);
+
+  const emptyEl = document.getElementById('frDCSearchEmpty');
+  const gridEl  = document.getElementById('frDCSummaryGrid');
+  if (entries.length === 0) {
+    gridEl.innerHTML = '';
+    if(emptyEl) emptyEl.style.display = 'block';
+    return;
+  }
+  if(emptyEl) emptyEl.style.display = 'none';
+
+  gridEl.innerHTML = entries.map(({dc, hit, mis, total, pct}) => {
+    const col = pct>=80?'#10b981':pct>=60?'#f59e0b':'#f97316';
+    const bg  = pct>=80?'#064e3b':pct>=60?'#451a03':'#431407';
+    const rank = sortBy==='total_desc' ? `📦 ${total.toLocaleString()} trip`
+               : sortBy==='rate_desc'  ? `📊 Rate ${pct}%`
+               : sortBy==='rate_asc'   ? `📊 Rate ${pct}%`
+               : '';
+    return `<div class="site-card" style="cursor:default;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;">
+        <div class="site-card-name" style="margin-bottom:0;">🏪 ${dc}</div>
+        ${rank?`<span style="font-size:.58rem;color:#475569;white-space:nowrap;margin-left:4px;">${rank}</span>`:''}
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">
+        <span class="site-ota-pct" style="color:${col}">${pct}%</span>
+        <span style="font-size:.66rem;background:${bg};color:${col};padding:2px 7px;border-radius:8px;">Fulfillment</span>
+      </div>
+      <div class="ota-bar-bg" style="margin-bottom:7px;height:7px;">
+        <div class="ota-bar-fill" style="width:${pct}%;background:${col};height:7px;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:.66rem;color:#94a3b8;">
+        <span style="color:#10b981">🎯 ${hit.toLocaleString()}</span>
+        <span style="color:#f97316">❌ ${mis.toLocaleString()}</span>
+        <span>📦 ${total.toLocaleString()}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── FR TAG ────────────────────────────────────────────────────────────────────
+function buildFRTag(f) {
+  const parts=[];
+  const s=fmtFilter(f.site);   if(s) parts.push(s);
+  const m=fmtFilter(f.month);  if(m) parts.push(m);
+  const mo=fmtFilter(f.moda);  if(mo) parts.push(mo);
+  const b=fmtFilter(f.batch);  if(b) parts.push(b);
+  const d=fmtFilter(f.dc);     if(d) parts.push(d);
+  const bu=fmtFilter(f.bu);    if(bu) parts.push(bu);
+  const v=fmtFilter(f.vendor); if(v) parts.push(v);
+  const dt=fmtFilter(f.date,'Tgl '); if(dt) parts.push(dt);
+  return parts.length?parts.join(' · '):'All Filter';
+}
+
+// ── FR APPLY ──────────────────────────────────────────────────────────────────
+function frApplyFilters() {
+  if(!FR.sites.length) return;
+  const f = getFRF();
+  const {total,hit,mis} = getFRStats(f);
+  const rate = total>0 ? Math.round(hit/total*100) : 0;
+  const col  = rate>=80?'#22d3ee':rate>=60?'#f59e0b':'#f97316';
+  document.getElementById('frKpiTotal').textContent = total.toLocaleString();
+  document.getElementById('frKpiHit').textContent   = hit.toLocaleString();
+  document.getElementById('frKpiMis').textContent   = mis.toLocaleString();
+  document.getElementById('frKpiRate').textContent  = rate+'%';
+  document.getElementById('frKpiRate').style.color  = col;
+  document.getElementById('frKpiRateSub').textContent = rate>=80?'✅ Target Tercapai':rate>=60?'⚠️ Perlu Perhatian':'🔴 Di Bawah Target';
+  document.getElementById('frFilterCount').textContent = total.toLocaleString();
+  document.getElementById('frChartTag').textContent = buildFRTag(f);
+  document.getElementById('frLastUpdated').textContent = new Date().toLocaleString('id-ID');
+  renderFRDayChart(getFRDayStats(f));
+  renderFRDCSummary(f);
+}
+
+// ── FR FILTER MANAGEMENT ──────────────────────────────────────────────────────
+function initFR() {
+  buildMS('frMsSite',  FR.sites,   'Site');
+  buildMS('frMsMonth', FR.months,  'Bulan');
+  buildMS('frMsBatch', FR.batches, 'Batch');
+  const f0 = getFRF();
+  populateFRModas(f0);
+  populateFRDCs(f0);
+  populateFRBUs(f0);
+  populateFRVendors(f0);
+  populateFRDays(f0);
+  frApplyFilters();
+}
+
+function populateFRDCs(f) {
+  const cur = getMS('frMsDC'); // simpan seleksi sebelumnya
+  const seen=new Set();
+  Object.keys(FR.summary).forEach(k => { if(matchFRKey(k,{...f,dc:'ALL'})) seen.add(k.split('|')[4]); });
+  const opts = [...seen].sort();
+  buildMS('frMsDC', opts, 'DC');
+  // Restore previous selection where still valid
+  if (cur !== 'ALL') {
+    const valid = cur.filter(v => opts.includes(v));
+    if (valid.length > 0) {
+      const el = document.getElementById('frMsDC');
+      if(el) { el.querySelectorAll('input.ms-cb').forEach(cb => { cb.checked = valid.includes(cb.value); }); setMSLabel('frMsDC', 'DC'); }
+    }
+  }
+}
+
+function populateFRBUs(f) {
+  const cur = getMS('frMsBU'); // simpan seleksi sebelumnya
+  const seen=new Set();
+  Object.keys(FR.summary).forEach(k => { if(matchFRKey(k,{...f,bu:'ALL'})) seen.add(k.split('|')[5]); });
+  const opts = [...seen].sort();
+  buildMS('frMsBU', opts, 'BU');
+  // Restore previous selection where still valid
+  if (cur !== 'ALL') {
+    const valid = cur.filter(v => opts.includes(v));
+    if (valid.length > 0) {
+      const el = document.getElementById('frMsBU');
+      if(el) { el.querySelectorAll('input.ms-cb').forEach(cb => { cb.checked = valid.includes(cb.value); }); setMSLabel('frMsBU', 'BU'); }
+    }
+  }
+}
+
+function populateFRModas(f) {
+  const seen=new Set();
+  Object.keys(FR.summary).forEach(k => { if(matchFRKey(k,{...f,moda:'ALL'})) seen.add(k.split('|')[2]); });
+  buildMS('frMsModa', [...seen].sort(), 'Moda');
+}
+
+function populateFRVendors(f) {
+  const cur = getMS('frMsVendor');
+  const seen = new Set();
+  // vendor key: site|month|moda|batch|dc|bu|vendor — matchFRKey checks [0-5] so 7-part key juga works
+  Object.keys(FR.vendor).forEach(k => { if(matchFRKey(k, f)) seen.add(k.split('|')[6]); });
+  const opts = [...seen].sort();
+  buildMS('frMsVendor', opts, 'Vendor');
+  // Restore previous selection where still valid
+  if (cur !== 'ALL') {
+    const valid = cur.filter(v => opts.includes(v));
+    if (valid.length > 0) {
+      const el = document.getElementById('frMsVendor');
+      if(el) { el.querySelectorAll('input.ms-cb').forEach(cb => { cb.checked = valid.includes(cb.value); }); setMSLabel('frMsVendor', 'Vendor'); }
+    }
+  }
+}
+
+function populateFRDays(f) {
+  const cur = getMS('frMsDate'); // simpan seleksi sebelumnya
+  const seen=new Set();
+  Object.keys(FR.daily).forEach(k => { if(matchFRKey(k,f)) seen.add(parseInt(k.split('|')[6])); });
+  const opts = [...seen].sort((a,b)=>a-b);
+  buildMS('frMsDate', opts.map(String), 'Tgl');
+  const el = document.getElementById('frMsDate');
+  if(el) {
+    el.querySelectorAll('input.ms-cb').forEach((cb,i) => {
+      const lbl = cb.closest('label'); if(lbl) lbl.lastChild.textContent = ' Tgl '+opts[i];
+    });
+    // Restore previous selection where still valid
+    if (cur !== 'ALL') {
+      const valid = cur.filter(v => opts.map(String).includes(v));
+      if (valid.length > 0) {
+        el.querySelectorAll('input.ms-cb').forEach(cb => { cb.checked = valid.includes(cb.value); });
+        setMSLabel('frMsDate', 'Tgl');
+      }
+    }
+  }
+}
+
+function onFRFilterChange() {
+  const f=getFRF(); populateFRModas(f); populateFRDCs(f); populateFRBUs(f); populateFRVendors(f); populateFRDays(f); frApplyFilters();
+}
+
+function resetFRFilters() {
+  ['frMsSite','frMsMonth','frMsModa','frMsBatch','frMsDC','frMsBU','frMsVendor','frMsDate'].forEach(id => {
+    const el = document.getElementById(id); if(!el) return;
+    el.querySelectorAll('input').forEach(cb => { cb.checked=false; cb.indeterminate=false; });
+    el.classList.remove('ms-active');
+    const lbl = el.querySelector('.ms-label');
+    if(lbl) {
+      const map={frMsSite:'Semua Site',frMsMonth:'Semua Bulan',frMsModa:'Semua Moda',frMsBatch:'Semua Batch',frMsDC:'Semua DC',frMsBU:'Semua BU',frMsVendor:'Semua Vendor',frMsDate:'Semua Tgl'};
+      lbl.textContent = map[id] || 'Semua';
+    }
+  });
+  frApplyFilters();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+fetchAndProcess();
+</script>
+</body>
+</html>

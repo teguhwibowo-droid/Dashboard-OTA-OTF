@@ -1,0 +1,2 @@
+# Tidak ada dependency tambahan!
+# fetch_sheets.py hanya pakai library bawaan Python (urllib, csv, io, os, sys)
